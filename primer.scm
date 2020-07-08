@@ -1,5 +1,7 @@
 ;; Scheme Primer
 
+;; self-evaluating literals
+
 ;; cons
 
 ;; car, cdr
