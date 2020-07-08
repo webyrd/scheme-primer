@@ -25,7 +25,8 @@
     (newline)))
 
 (define main-menu-items
-  '("cons practice"
+  '("parentheses practice"
+    "cons practice"
     "car and cdr practice"
     "box and pointers practice"
     "conditionals practice"
