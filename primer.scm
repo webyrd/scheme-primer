@@ -128,6 +128,10 @@
 
 ;; s-expressions
 
+;; boolean expressions
+
+;; arithmetic
+
 ;; conditionals
 
 ;; definitions
