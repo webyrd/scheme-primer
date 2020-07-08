@@ -24,12 +24,36 @@
     (newline)
     (newline)))
 
+(define main-menu-items
+  '("cons practice"
+    "car and cdr practice"
+    "box and pointers practice"
+    "conditionals practice"
+    "lambda and application practice"
+    "variables, scope, binding, and shadowing practice"
+    ))
+
+(define iota
+  (lambda (n)
+    (let loop ((i 0))
+      (cond
+        ((= i n) '())
+        (else (cons i (loop (add1 i))))))))
+
 (define main-menu
   (lambda ()
-    (display "Main Menu")
+    (display "Main Menu (please enter the number in parentheses)")
     (newline)
     (display "----------")
     (newline)
+    (for-each (lambda (str i)
+                (display "(")
+                (display i)
+                (display ") ")
+                (display str)
+                (newline))
+              main-menu-items
+              (iota (length main-menu-items)))
     ))
 
 (print-greeting)
@@ -52,7 +76,7 @@
 
 ;; definitions
 
-;; variables, scope, binding, shadowing
+;; variables, scope, binding, and shadowing
 
 ;; lambda and application
 
