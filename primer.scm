@@ -17,7 +17,7 @@
     (display "The Scheme Primer will automatically adjust the difficulty of the exercises depending on how well you have performed on previous exercises.")
     (newline)
     (newline)
-    (display "The Scheme Primer is itself written in Scheme.  The Scheme Primer will teach you how to implement enough Scheme to run the Primer in your own Scheme implementation (\"Primer-ception\").")
+    (display "The Scheme Primer is itself written in Scheme.  The Scheme Primer will teach you how to implement enough Scheme to run the Primer in your own Scheme implementation (\"Meta-circular Primer\"/\"Primer-ception\").")
     (newline)
     (newline)
     (display "The Scheme Primer also allows you to jump to specific lessons or pratice exercises.")
