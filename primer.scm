@@ -24,9 +24,17 @@
     (newline)
     (newline)))
 
+(define main-menu
+  (lambda ()
+    (display "Main Menu")
+    (newline)
+    (display "----------")
+    (newline)
+    ))
+
 (print-greeting)
 
-;; (print-main-menu)
+(main-menu)
 
 ;; self-evaluating literals
 
