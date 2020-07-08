@@ -1,6 +1,6 @@
 ;; Scheme Primer
 
-(define primer-version-string "0.1")
+(define primer-version-string "0.00000001")
 
 (define print-greeting
   (lambda ()
@@ -31,6 +31,9 @@
     "conditionals practice"
     "lambda and application practice"
     "variables, scope, binding, and shadowing practice"
+    "simple recursion practice"
+    "quasiquote, unquote, and unquote-splicing practice"
+    "pattern-matching practice"
     ))
 
 (define iota
