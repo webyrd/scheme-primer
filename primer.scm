@@ -24,18 +24,33 @@
     (newline)
     (newline)))
 
+(define exit-primer
+  (lambda ()
+    (display "exiting Scheme Primer")
+    (newline)))
+
+(define unimplemented-menu-item
+  (lambda ()
+    (display "Sorry--this menu item has not been implemented yet.")
+    (newline)
+    (display "Please choose a different menu item.")
+    (newline)
+    (newline)        
+    (main-menu)))
+
 (define main-menu-items
-  '("parentheses practice"
-    "'cons' practice"
-    "'car' and 'cdr' practice"
-    "box-and-pointers practice"
-    "conditionals practice"
-    "'lambda' and application practice"
-    "variables, scope, binding, and shadowing practice"
-    "point-wise programming practice"
-    "simple recursion practice"
-    "'quasiquote', 'unquote', and 'unquote-splicing' practice"
-    "pattern-matching practice"
+  `(("exit Scheme Primer" . ,exit-primer)
+    ("parentheses practice" . ,unimplemented-menu-item)
+    ("'cons' practice" . ,unimplemented-menu-item)
+    ("'car' and 'cdr' practice" . ,unimplemented-menu-item)
+    ("box-and-pointers practice" . ,unimplemented-menu-item)
+    ("conditionals practice" . ,unimplemented-menu-item)
+    ("'lambda' and application practice" . ,unimplemented-menu-item)
+    ("variables, scope, binding, and shadowing practice" . ,unimplemented-menu-item)
+    ("point-wise programming practice" . ,unimplemented-menu-item)
+    ("simple recursion practice" . ,unimplemented-menu-item)
+    ("'quasiquote', 'unquote', and 'unquote-splicing' practice" . ,unimplemented-menu-item)
+    ("pattern-matching practice" . ,unimplemented-menu-item)
     ))
 
 (define iota
@@ -51,11 +66,11 @@
     (newline)
     (display "----------")
     (newline)
-    (for-each (lambda (str i)
+    (for-each (lambda (pr i)
                 (display "(")
                 (display i)
                 (display ") ")
-                (display str)
+                (display (car pr))
                 (newline))
               main-menu-items
               (iota (length main-menu-items)))
@@ -69,8 +84,20 @@
               (integer? choice)
               (>= choice 0)
               (< choice (length main-menu-items)))
-         (display choice))
+         (newline)
+         (display "You chose (")
+         (display choice)
+         (display "), ")
+         (display (car (list-ref main-menu-items choice)))
+         (display ".")
+         (newline)
+         (newline)
+         (display "Come on!  Here we go!")
+         (newline)
+         (newline)
+         ((cdr (list-ref main-menu-items choice))))
         (else
+         (newline)
          (display "Sorry--I didn't understand your choice!")
          (newline)         
          (display "Please try again!  Please enter a number between 0 and ")
