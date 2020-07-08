@@ -26,14 +26,15 @@
 
 (define main-menu-items
   '("parentheses practice"
-    "cons practice"
-    "car and cdr practice"
-    "box and pointers practice"
+    "'cons' practice"
+    "'car' and 'cdr' practice"
+    "box-and-pointers practice"
     "conditionals practice"
-    "lambda and application practice"
+    "'lambda' and application practice"
     "variables, scope, binding, and shadowing practice"
+    "point-wise programming practice"
     "simple recursion practice"
-    "quasiquote, unquote, and unquote-splicing practice"
+    "'quasiquote', 'unquote', and 'unquote-splicing' practice"
     "pattern-matching practice"
     ))
 
@@ -46,7 +47,7 @@
 
 (define main-menu
   (lambda ()
-    (display "Main Menu (please enter the number in parentheses)")
+    (display "Main Menu")
     (newline)
     (display "----------")
     (newline)
@@ -58,7 +59,26 @@
                 (newline))
               main-menu-items
               (iota (length main-menu-items)))
-    ))
+    (display "----------")
+    (newline)
+    (display "Please enter the number of your choice from the menu above:")
+    (newline)
+    (let ((choice (read)))
+      (cond
+        ((and (number? choice)
+              (integer? choice)
+              (>= choice 0)
+              (< choice (length main-menu-items)))
+         (display choice))
+        (else
+         (display "Sorry--I didn't understand your choice!")
+         (newline)         
+         (display "Please try again!  Please enter a number between 0 and ")
+         (display (sub1 (length main-menu-items)))
+         (display ", inclusive.")
+         (newline)
+         (newline)
+         (main-menu))))))
 
 (print-greeting)
 
