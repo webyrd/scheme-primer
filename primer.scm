@@ -1,14 +1,26 @@
 ;; Scheme Primer
 
-(printf "Welcome to the Scheme Primer.\n\n")
+(define print-greeting
+  (lambda ()
+    (display "Welcome to the Scheme Primer.")
+    (newline)
+    (newline)
+    (display "Scheme is a programming language, and is a dialect of the LISP family of languages.")
+    (newline)
+    (newline)
+    (display "This interactive Scheme Primer will teach you Scheme, and challenge you to write Scheme code of increasing complexity.")
+    (newline)
+    (newline)
+    (display "The Scheme Primer will automatically adjust the difficulty of the exercises depending on how well you have performed on previous exercises.")
+    (newline)
+    (newline)
+    (display "The Scheme Primer also allows you to jump to specific lessons or pratice exercises.")
+    (newline)
+    (newline)))
 
-(printf "Scheme is a programming language, and is a dialect of the LISP family of languages.\n\n")
+(print-greeting)
 
-(printf "This interactive Scheme Primer will teach you Scheme, and challenge you to write Scheme code of increasing complexity.\n\n")
-
-(printf "The Scheme Primer will automatically adjust the difficulty of the exercises depending on how well you have performed on previous exercises.\n\n")
-
-(printf "The Scheme Primers also allows you to jump to specific lessons or pratice exercises.")
+;; (print-main-menu)
 
 ;; self-evaluating literals
 
