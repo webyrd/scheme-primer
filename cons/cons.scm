@@ -14,47 +14,47 @@
          (evalo/proper-or-improper-list e1 v1)
          (evalo/proper-or-improper-list e2 v2))))))
 
-(define evalo/proper-or-improper-list-cons-count-animals
-  (lambda (expr cons-count cons-count^ val)
+(define evalo/proper-or-improper-list-cons-count-symbols
+  (lambda (expr symbols cons-count cons-count^ val)
     (conde
       ((== `(quote ,val) expr)
        (== cons-count cons-count^)
        (conde
          ((== '() val))
-         ((animal-symbolo val))))
+         ((membero val symbols))))
       ((fresh (e1 e2 v1 v2 cons-count-1 cons-count^^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (== `(s ,cons-count-1) cons-count)
-         (evalo/proper-or-improper-list-cons-count-animals e1 cons-count-1 cons-count^^ v1)
-         (evalo/proper-or-improper-list-cons-count-animals e2 cons-count^^ cons-count^ v2))))))
+         (evalo/proper-or-improper-list-cons-count-symbols e1 symbols cons-count-1 cons-count^^ v1)
+         (evalo/proper-or-improper-list-cons-count-symbols e2 symbols cons-count^^ cons-count^ v2))))))
 
-(define evalo/proper-or-improper-list-animals
-  (lambda (expr val)
+(define evalo/proper-or-improper-list-symbols
+  (lambda (expr symbols val)
     (conde
       ((== `(quote ,val) expr)
        (conde
          ((== '() val))
-         ((animal-symbolo val))))
+         ((membero val symbols))))
       ((fresh (e1 e2 v1 v2)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
-         (evalo/proper-or-improper-list-animals e1 v1)
-         (evalo/proper-or-improper-list-animals e2 v2))))))
+         (evalo/proper-or-improper-list-symbols e1 symbols v1)
+         (evalo/proper-or-improper-list-symbols e2 symbols v2))))))
 
-(define evalo/proper-list-animals
-  (lambda (expr val)
+(define evalo/proper-list-symbols
+  (lambda (expr symbols val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val))
       ((fresh (e1 e2 v1 v2)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
-         (evalo/proper-or-improper-list-animals e1 v1)
-         (evalo/proper-list-animals e2 v2))))))
+         (evalo/proper-or-improper-list-symbols e1 symbols v1)
+         (evalo/proper-list-symbols e2 symbols v2))))))
 
-(define evalo/flat-proper-list-animals
-  (lambda (expr val)
+(define evalo/flat-proper-list-symbols
+  (lambda (expr symbols val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val))
@@ -62,120 +62,120 @@
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (== `(quote ,v1) e1)
-         (animal-symbolo v1)
-         (evalo/flat-proper-list-animals e2 v2))))))
+         (membero v1 symbols)
+         (evalo/flat-proper-list-symbols e2 symbols v2))))))
 
-(define evalo/flat-proper-list-distinct-animals
-  (lambda (expr animals val)
+(define evalo/flat-proper-list-distinct-symbols
+  (lambda (expr symbols val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val))
-      ((fresh (e1 e2 v1 v2 animals^)
+      ((fresh (e1 e2 v1 v2 symbols^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (== `(quote ,v1) e1)
-         (remove-exactly-oneo v1 animals animals^)
-         (evalo/flat-proper-list-distinct-animals e2 animals^ v2))))))
+         (remove-exactly-oneo v1 symbols symbols^)
+         (evalo/flat-proper-list-distinct-symbols e2 symbols^ v2))))))
 
-(define evalo/deep-proper-list-distinct-animals
-  (lambda (expr all-animals animals-at-this-level val)
+(define evalo/deep-proper-list-distinct-symbols
+  (lambda (expr all-symbols symbols-at-this-level val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val))
-      ((fresh (e1 e2 v1 v2 animals-at-this-level^)
+      ((fresh (e1 e2 v1 v2 symbols-at-this-level^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (conde
            ((== `(quote ,v1) e1)
-            (remove-exactly-oneo v1 animals-at-this-level animals-at-this-level^))
-           ((== animals-at-this-level animals-at-this-level^)
-            (evalo/deep-proper-list-distinct-animals e1 all-animals all-animals v1)))
-         (evalo/deep-proper-list-distinct-animals e2 all-animals animals-at-this-level^ v2))))))
+            (remove-exactly-oneo v1 symbols-at-this-level symbols-at-this-level^))
+           ((== symbols-at-this-level symbols-at-this-level^)
+            (evalo/deep-proper-list-distinct-symbols e1 all-symbols all-symbols v1)))
+         (evalo/deep-proper-list-distinct-symbols e2 all-symbols symbols-at-this-level^ v2))))))
 
-(define evalo/deep-proper-non-empty-list-distinct-animals
-  (lambda (expr all-animals animals-at-this-level val)
+(define evalo/deep-proper-non-empty-list-distinct-symbols
+  (lambda (expr all-symbols symbols-at-this-level val)
     (conde
-      ((fresh (v animals-at-this-level^)
+      ((fresh (v symbols-at-this-level^)
          (== `(cons (quote ,v) (quote ())) expr)
          (== `(,v . ()) val)
-         (remove-exactly-oneo v animals-at-this-level animals-at-this-level^)))
-      ((fresh (e1 e2 v1 v2 animals-at-this-level^)
+         (remove-exactly-oneo v symbols-at-this-level symbols-at-this-level^)))
+      ((fresh (e1 e2 v1 v2 symbols-at-this-level^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (conde
            ((== `(quote ,v1) e1)
-            (remove-exactly-oneo v1 animals-at-this-level animals-at-this-level^))
-           ((== animals-at-this-level animals-at-this-level^)
-            (evalo/deep-proper-non-empty-list-distinct-animals e1 all-animals all-animals v1)))
-         (evalo/deep-proper-non-empty-list-distinct-animals e2 all-animals animals-at-this-level^ v2))))))
+            (remove-exactly-oneo v1 symbols-at-this-level symbols-at-this-level^))
+           ((== symbols-at-this-level symbols-at-this-level^)
+            (evalo/deep-proper-non-empty-list-distinct-symbols e1 all-symbols all-symbols v1)))
+         (evalo/deep-proper-non-empty-list-distinct-symbols e2 all-symbols symbols-at-this-level^ v2))))))
 
-(define evalo/deep-proper-non-empty-list-deep-distinct-animals
-  (lambda (expr animals animals^ val)
+(define evalo/deep-proper-non-empty-list-deep-distinct-symbols
+  (lambda (expr symbols symbols^ val)
     (conde
       ((fresh (v)
          (== `(cons (quote ,v) (quote ())) expr)
          (== `(,v . ()) val)
-         (remove-exactly-oneo v animals animals^)))
-      ((fresh (e1 e2 v1 v2 animals^^)
+         (remove-exactly-oneo v symbols symbols^)))
+      ((fresh (e1 e2 v1 v2 symbols^^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (conde
            ((== `(quote ,v1) e1)
-            (remove-exactly-oneo v1 animals animals^^))
-           ((evalo/deep-proper-non-empty-list-deep-distinct-animals e1 animals animals^^ v1)))
-         (evalo/deep-proper-non-empty-list-deep-distinct-animals e2 animals^^ animals^ v2))))))
+            (remove-exactly-oneo v1 symbols symbols^^))
+           ((evalo/deep-proper-non-empty-list-deep-distinct-symbols e1 symbols symbols^^ v1)))
+         (evalo/deep-proper-non-empty-list-deep-distinct-symbols e2 symbols^^ symbols^ v2))))))
 
-(define evalo/deep-proper-non-empty-list-deep-distinct-animals-count
-  (lambda (expr animals animals^ cons-count cons-count^ val)
+(define evalo/deep-proper-non-empty-list-deep-distinct-symbols-count
+  (lambda (expr symbols symbols^ cons-count cons-count^ val)
     (conde
       ((fresh (v)
          (== `(cons (quote ,v) (quote ())) expr)
          (== `(s ,cons-count^) cons-count)
          (== `(,v . ()) val)
-         (remove-exactly-oneo v animals animals^)))
-      ((fresh (e1 e2 v1 v2 animals^^ cons-count-1 cons-count^^)
+         (remove-exactly-oneo v symbols symbols^)))
+      ((fresh (e1 e2 v1 v2 symbols^^ cons-count-1 cons-count^^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (== `(s ,cons-count-1) cons-count)
          (conde
            ((== `(quote ,v1) e1)
             (== cons-count^^ cons-count-1)
-            (remove-exactly-oneo v1 animals animals^^))
-           ((evalo/deep-proper-non-empty-list-deep-distinct-animals-count e1 animals animals^^ cons-count-1 cons-count^^ v1)))
-         (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e2 animals^^ animals^ cons-count^^ cons-count^ v2))))))
+            (remove-exactly-oneo v1 symbols symbols^^))
+           ((evalo/deep-proper-non-empty-list-deep-distinct-symbols-count e1 symbols symbols^^ cons-count-1 cons-count^^ v1)))
+         (evalo/deep-proper-non-empty-list-deep-distinct-symbols-count e2 symbols^^ symbols^ cons-count^^ cons-count^ v2))))))
 
-(define evalo/deep-proper-list-deep-distinct-animals-count
-  (lambda (expr animals animals^ cons-count cons-count^ val)
+(define evalo/deep-proper-list-deep-distinct-symbols-count
+  (lambda (expr symbols symbols^ cons-count cons-count^ val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val)
-       (== animals animals^)
+       (== symbols symbols^)
        (== cons-count cons-count^))
-      ((fresh (e1 e2 v1 v2 animals^^ cons-count-1 cons-count^^)
+      ((fresh (e1 e2 v1 v2 symbols^^ cons-count-1 cons-count^^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (== `(s ,cons-count-1) cons-count)
          (conde
            ((== `(quote ,v1) e1)
             (== cons-count^^ cons-count-1)
-            (remove-exactly-oneo v1 animals animals^^))
-           ((evalo/deep-proper-list-deep-distinct-animals-count e1 animals animals^^ cons-count-1 cons-count^^ v1)))
-         (evalo/deep-proper-list-deep-distinct-animals-count e2 animals^^ animals^ cons-count^^ cons-count^ v2))))))
+            (remove-exactly-oneo v1 symbols symbols^^))
+           ((evalo/deep-proper-list-deep-distinct-symbols-count e1 symbols symbols^^ cons-count-1 cons-count^^ v1)))
+         (evalo/deep-proper-list-deep-distinct-symbols-count e2 symbols^^ symbols^ cons-count^^ cons-count^ v2))))))
 
-(define evalo/deep-proper-list-deep-distinct-animals
-  (lambda (expr animals animals^ val)
+(define evalo/deep-proper-list-deep-distinct-symbols
+  (lambda (expr symbols symbols^ val)
     (conde
       ((== `(quote ,val) expr)
        (== '() val)
-       (== animals animals^))
-      ((fresh (e1 e2 v1 v2 animals^^)
+       (== symbols symbols^))
+      ((fresh (e1 e2 v1 v2 symbols^^)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
          (conde
            ((== `(quote ,v1) e1)
-            (remove-exactly-oneo v1 animals animals^^))
-           ((evalo/deep-proper-list-deep-distinct-animals e1 animals animals^^ v1)))
-         (evalo/deep-proper-list-deep-distinct-animals e2 animals^^ animals^ v2))))))
+            (remove-exactly-oneo v1 symbols symbols^^))
+           ((evalo/deep-proper-list-deep-distinct-symbols e1 symbols symbols^^ v1)))
+         (evalo/deep-proper-list-deep-distinct-symbols e2 symbols^^ symbols^ v2))))))
 
 
 (define animals
@@ -186,10 +186,6 @@
     rat
     ant
     bat))
-
-(define animal-symbolo
-  (lambda (sym)
-    (membero sym animals)))
 
 (define membero
   (lambda (x ls)
