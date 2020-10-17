@@ -139,3 +139,19 @@
        (fresh (symbols symbols^)
          (membero symbols (list animals letters dan-scheme))
          (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v))))
+
+(andmap (lambda (e/v) (let ((e (car e/v)) (v (cadr e/v))) (equal? (eval e) v)))
+        (run* (e v)
+          (fresh (symbols symbols^)
+            (membero symbols (list animals letters dan-scheme))
+            (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v))))
+
+(andmap
+  (lambda (e/v)
+    (let ((e (car e/v))
+          (v (cadr e/v)))
+      (equal? (run* (q) (evalo/proper-or-improper-list q v)) (list e))))
+  (run* (e v)
+    (fresh (symbols symbols^)
+      (membero symbols (list animals letters dan-scheme))
+      (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v))))
