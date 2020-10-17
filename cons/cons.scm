@@ -49,6 +49,38 @@
          (remove-exactly-oneo v1 animals animals^)
          (evalo/flat-proper-list-distinct-animals e2 animals^ v2))))))
 
+(define evalo/deep-proper-list-distinct-animals
+  (lambda (expr all-animals animals-at-this-level val)
+    (conde
+      ((== `(quote ,val) expr)
+       (== '() val))
+      ((fresh (e1 e2 v1 v2 animals-at-this-level^)
+         (== `(cons ,e1 ,e2) expr)
+         (== `(,v1 . ,v2) val)
+         (conde
+           ((== `(quote ,v1) e1)
+            (remove-exactly-oneo v1 animals-at-this-level animals-at-this-level^))
+           ((== animals-at-this-level animals-at-this-level^)
+            (evalo/deep-proper-list-distinct-animals e1 all-animals all-animals v1)))
+         (evalo/deep-proper-list-distinct-animals e2 all-animals animals-at-this-level^ v2))))))
+
+(define evalo/deep-proper-non-empty-list-distinct-animals
+  (lambda (expr all-animals animals-at-this-level val)
+    (conde
+      ((fresh (v animals-at-this-level^)
+         (== `(cons (quote ,v) (quote ())) expr)
+         (== `(,v . ()) val)
+         (remove-exactly-oneo v animals-at-this-level animals-at-this-level^)))
+      ((fresh (e1 e2 v1 v2 animals-at-this-level^)
+         (== `(cons ,e1 ,e2) expr)
+         (== `(,v1 . ,v2) val)
+         (conde
+           ((== `(quote ,v1) e1)
+            (remove-exactly-oneo v1 animals-at-this-level animals-at-this-level^))
+           ((== animals-at-this-level animals-at-this-level^)
+            (evalo/deep-proper-non-empty-list-distinct-animals e1 all-animals all-animals v1)))
+         (evalo/deep-proper-non-empty-list-distinct-animals e2 all-animals animals-at-this-level^ v2))))))
+
 (define animals
   '(cat
     dog
