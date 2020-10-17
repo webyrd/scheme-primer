@@ -1,6 +1,28 @@
 (load "cons.scm")
 
 (run 10 (e v)
+  (evalo/proper-or-improper-list e v))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '()))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '(cat)))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '(dog rat)))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '(cat (dog) . rat)))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '(cat (((dog))) rat)))
+
+(run* (e)
+  (evalo/proper-or-improper-list e '(( (((dog)))) (rat))))
+
+
+(run 10 (e v)
   (evalo/proper-or-improper-list-animals e v))
 
 (run 10 (e v)
