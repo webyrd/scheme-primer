@@ -128,3 +128,14 @@
 (run* (e v)
   (fresh (dan-scheme^)
     (evalo/deep-proper-list-deep-distinct-symbols-count e dan-scheme dan-scheme^ '(s (s (s z))) 'z v)))
+
+(run* (e v)
+  (fresh (symbols symbols^)
+    (membero symbols (list animals letters dan-scheme))
+    (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v)))
+
+(map cadr
+     (run* (e v)
+       (fresh (symbols symbols^)
+         (membero symbols (list animals letters dan-scheme))
+         (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v))))
