@@ -14,6 +14,21 @@
          (evalo/proper-or-improper-list e1 v1)
          (evalo/proper-or-improper-list e2 v2))))))
 
+(define evalo/proper-or-improper-list-cons-count-animals
+  (lambda (expr cons-count cons-count^ val)
+    (conde
+      ((== `(quote ,val) expr)
+       (== cons-count cons-count^)
+       (conde
+         ((== '() val))
+         ((animal-symbolo val))))
+      ((fresh (e1 e2 v1 v2 cons-count-1 cons-count^^)
+         (== `(cons ,e1 ,e2) expr)
+         (== `(,v1 . ,v2) val)
+         (== `(s ,cons-count-1) cons-count)
+         (evalo/proper-or-improper-list-cons-count-animals e1 cons-count-1 cons-count^^ v1)
+         (evalo/proper-or-improper-list-cons-count-animals e2 cons-count^^ cons-count^ v2))))))
+
 (define evalo/proper-or-improper-list-animals
   (lambda (expr val)
     (conde

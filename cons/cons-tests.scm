@@ -19,7 +19,18 @@
   (evalo/proper-or-improper-list e '(cat (((dog))) rat)))
 
 (run* (e)
-  (evalo/proper-or-improper-list e '(( (((dog)))) (rat))))
+  (evalo/proper-or-improper-list e '(((cat) (((dog)))) (rat))))
+
+
+
+(run* (e v)
+  (evalo/proper-or-improper-list-cons-count-animals e 'z 'z v))
+
+(run* (e v)
+  (evalo/proper-or-improper-list-cons-count-animals e '(s z) 'z v))
+
+(run* (e v)
+  (evalo/proper-or-improper-list-cons-count-animals e '(s (s z)) 'z v))
 
 
 (run 10 (e v)
