@@ -78,3 +78,45 @@
 (run 10 (e v)
   (fresh (animals^)
     (evalo/deep-proper-list-deep-distinct-animals e animals animals^ v)))
+
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ 'z 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s z) 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s z)) 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s z))) 'z v)))
+
+(length
+ (run* (e v)
+   (fresh (animals^)
+     (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s z))) 'z v))))
+
+(map cadr
+     (run* (e v)
+       (fresh (animals^)
+         (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s z))) 'z v))))
+
+(length
+ (run* (e v)
+   (fresh (animals^)
+     (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s (s z)))) 'z v))))
+
+(map cadr
+     (run* (e v)
+       (fresh (animals^)
+         (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s (s z)))) 'z v))))
+
+(andmap (lambda (e/v) (let ((e (car e/v)) (v (cadr e/v))) (equal? (eval e) v)))
+        (run* (e v)
+          (fresh (animals^)
+            (evalo/deep-proper-list-deep-distinct-animals-count e animals animals^ '(s (s (s (s z)))) 'z v))))
