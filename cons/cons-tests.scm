@@ -71,3 +71,10 @@
 (run* (e v)
   (fresh (animals^)
     (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e animals animals^ '(s (s (s z))) 'z v)))
+
+
+
+
+(run 10 (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-list-deep-distinct-animals e animals animals^ v)))
