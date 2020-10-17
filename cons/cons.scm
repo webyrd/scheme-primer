@@ -187,6 +187,25 @@
     ant
     bat))
 
+(define letters
+  '(a
+    b
+    c
+    d
+    e
+    f
+    g))
+
+(define dan-scheme
+  '(quote
+    null?
+    equal?
+    cons
+    car
+    cdr
+    lambda
+    cond))
+
 (define membero
   (lambda (x ls)
     (fresh (y rest)

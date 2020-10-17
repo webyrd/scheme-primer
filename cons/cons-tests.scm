@@ -120,3 +120,11 @@
         (run* (e v)
           (fresh (animals^)
             (evalo/deep-proper-list-deep-distinct-symbols-count e animals animals^ '(s (s (s (s z)))) 'z v))))
+
+(run* (e v)
+  (fresh (letters^)
+    (evalo/deep-proper-list-deep-distinct-symbols-count e letters letters^ '(s (s (s z))) 'z v)))
+
+(run* (e v)
+  (fresh (dan-scheme^)
+    (evalo/deep-proper-list-deep-distinct-symbols-count e dan-scheme dan-scheme^ '(s (s (s z))) 'z v)))
