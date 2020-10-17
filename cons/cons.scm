@@ -81,6 +81,22 @@
             (evalo/deep-proper-non-empty-list-distinct-animals e1 all-animals all-animals v1)))
          (evalo/deep-proper-non-empty-list-distinct-animals e2 all-animals animals-at-this-level^ v2))))))
 
+(define evalo/deep-proper-non-empty-list-deep-distinct-animals
+  (lambda (expr animals animals^ val)
+    (conde
+      ((fresh (v)
+         (== `(cons (quote ,v) (quote ())) expr)
+         (== `(,v . ()) val)
+         (remove-exactly-oneo v animals animals^)))
+      ((fresh (e1 e2 v1 v2 animals^^)
+         (== `(cons ,e1 ,e2) expr)
+         (== `(,v1 . ,v2) val)
+         (conde
+           ((== `(quote ,v1) e1)
+            (remove-exactly-oneo v1 animals animals^^))
+           ((evalo/deep-proper-non-empty-list-deep-distinct-animals e1 animals animals^^ v1)))
+         (evalo/deep-proper-non-empty-list-deep-distinct-animals e2 animals^^ animals^ v2))))))
+
 (define animals
   '(cat
     dog

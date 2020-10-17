@@ -17,3 +17,7 @@
 
 (run 10 (e v)
   (evalo/deep-proper-non-empty-list-distinct-animals e animals animals v))
+
+(run 10 (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-non-empty-list-deep-distinct-animals e animals animals^ v)))
