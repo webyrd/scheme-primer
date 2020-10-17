@@ -54,3 +54,20 @@
 (run 10 (e v)
   (fresh (animals^)
     (evalo/deep-proper-non-empty-list-deep-distinct-animals e animals animals^ v)))
+
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e animals animals^ 'z 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e animals animals^ '(s z) 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e animals animals^ '(s (s z)) 'z v)))
+
+(run* (e v)
+  (fresh (animals^)
+    (evalo/deep-proper-non-empty-list-deep-distinct-animals-count e animals animals^ '(s (s (s z))) 'z v)))
