@@ -1,13 +1,13 @@
 (load "cons.scm")
 
 (run 10 (e v)
-  (evalo/proper-or-improper-list e v))
+  (evalo/proper-or-improper-list-animals e v))
 
 (run 10 (e v)
-  (evalo/proper-list e v))
+  (evalo/proper-list-animals e v))
 
 (run 10 (e v)
-  (evalo/flat-proper-list e v))
+  (evalo/flat-proper-list-animals e v))
 
 (run 10 (e v)
   (evalo/flat-proper-list-distinct-animals e animals v))

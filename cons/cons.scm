@@ -1,7 +1,7 @@
 (load "../faster-miniKanren/mk-vicare.scm")
 (load "../faster-miniKanren/mk.scm")
 
-(define evalo/proper-or-improper-list
+(define evalo/proper-or-improper-list-animals
   (lambda (expr val)
     (conde
       ((== `(quote ,val) expr)
@@ -11,10 +11,10 @@
       ((fresh (e1 e2 v1 v2)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
-         (evalo/proper-or-improper-list e1 v1)
-         (evalo/proper-or-improper-list e2 v2))))))
+         (evalo/proper-or-improper-list-animals e1 v1)
+         (evalo/proper-or-improper-list-animals e2 v2))))))
 
-(define evalo/proper-list
+(define evalo/proper-list-animals
   (lambda (expr val)
     (conde
       ((== `(quote ,val) expr)
@@ -22,10 +22,10 @@
       ((fresh (e1 e2 v1 v2)
          (== `(cons ,e1 ,e2) expr)
          (== `(,v1 . ,v2) val)
-         (evalo/proper-or-improper-list e1 v1)
-         (evalo/proper-list e2 v2))))))
+         (evalo/proper-or-improper-list-animals e1 v1)
+         (evalo/proper-list-animals e2 v2))))))
 
-(define evalo/flat-proper-list
+(define evalo/flat-proper-list-animals
   (lambda (expr val)
     (conde
       ((== `(quote ,val) expr)
@@ -35,7 +35,7 @@
          (== `(,v1 . ,v2) val)
          (== `(quote ,v1) e1)
          (animal-symbolo v1)
-         (evalo/flat-proper-list e2 v2))))))
+         (evalo/flat-proper-list-animals e2 v2))))))
 
 (define evalo/flat-proper-list-distinct-animals
   (lambda (expr animals val)
