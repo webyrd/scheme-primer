@@ -150,3 +150,49 @@
     (fresh (symbols symbols^)
       (membero symbols (list animals letters dan-scheme))
       (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v))))
+
+
+(let ((e/v* (run* (e v)
+              (fresh (symbols symbols^)
+                (membero symbols (list animals letters dan-scheme))
+                (evalo/deep-proper-list-deep-distinct-symbols-count e symbols symbols^ '(s (s z)) 'z v)))))
+  (let ((e/v*-length (length e/v*)))
+    (let ((num-problems 5))
+      (let loop ((i 1)
+                 (pass 0)
+                 (fail 0))
+        (cond
+          ((= i num-problems)
+           (printf "finished!\n")
+           (printf "elapsed time:\n" )
+           (printf "passed: ~s of ~s\n" pass (+ pass fail)))
+          (else
+           (let ((e/v (list-ref e/v* (random e/v*-length))))
+             (let ((e (car e/v))
+                   (v (cadr e/v)))
+               (printf "\n-----------------------\n\n")
+               (printf "problem ~s of ~s\n\n" i num-problems)
+               (printf "enter an expression containing only 'cons', 'quote', symbols, and the empty list ()\n")
+               (printf "or enter 'exit'\n\n")
+               (printf "~s\n\n" v)
+               (let ((entered-e (read)))
+                 (cond
+                   ((or (equal? 'exit entered-e) (equal? '(quote exit) entered-e))
+                    (loop num-problems
+                          pass
+                          fail))
+                   (else
+                    (newline)
+                    (let-values (((pass fail) (if (equal? entered-e e)
+                                                  (begin
+                                                    (printf "correct!\n")
+                                                    (values (add1 pass) fail))
+                                                  (begin
+                                                    (printf "incorrect!\n\n")
+                                                    (printf "correct answer: ~a\n" e)
+                                                    (values pass (add1 fail))))))
+                      (newline)
+                      (printf "passed: ~s of ~s\n" pass (+ pass fail))
+                      (loop (add1 i)
+                            pass
+                            fail)))))))))))))
