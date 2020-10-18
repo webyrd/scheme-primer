@@ -142,3 +142,37 @@
 
 (run* (subst^)
   (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() '() subst^))
+
+(run 2 (expr)
+  (eval-mko expr '() '() '(((var x) . dog))))
+;; =>
+#|
+((fresh (x) (== 'dog x)) (fresh (x) (== x 'dog)))
+|#
+
+(run 10 (expr)
+  (eval-mko expr '() '() '(((var x) . dog))))
+;; =>
+#|
+((fresh (x) (== 'dog x)) (fresh (x) (== x 'dog))
+ ((fresh (_.0) (fresh (x) (== 'dog x))) (sym _.0))
+ ((fresh (x) (== '_.0 '_.0) (== 'dog x))
+  (=/= ((_.0 var)))
+  (sym _.0))
+ ((fresh (_.0) (fresh (x) (== x 'dog))) (sym _.0))
+ ((fresh (x) (== '_.0 '_.0) (== x 'dog))
+  (=/= ((_.0 var)))
+  (sym _.0))
+ ((fresh (x) (== 'dog x) (== '_.0 '_.0))
+  (=/= ((_.0 var)))
+  (sym _.0))
+ ((fresh (x) (fresh (_.0) (== '_.1 '_.1)) (== 'dog x))
+  (=/= ((_.1 var)))
+  (sym _.0 _.1))
+ ((fresh (x) (fresh (_.0) (== '_.1 '_.1)) (== x 'dog))
+  (=/= ((_.1 var)))
+  (sym _.0 _.1))
+ ((fresh (x) (== '(_.0 . dog) (cons '_.0 x)))
+  (=/= ((_.0 var)))
+  (sym _.0)))
+|#
