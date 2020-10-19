@@ -1,6 +1,81 @@
 (load "core-mk-explicit-failure-streams.scm")
 (load "../faster-miniKanren/test-check.scm")
 
+
+
+(test "walko the dog"
+  (run* (q) (walko 'dog '(((var z) . cat)) q))
+  '(dog))
+
+(test "walko the dogs"
+  (run* (q) (walko '(dog . dog) '(((var z) . cat)) q))
+  '((dog . dog)))
+
+(test "walko the vars"
+  (run* (q) (walko '((var z) . (var z)) '(((var z) . cat)) q))
+  '(((var z) var z)))
+
+(test "walko 1"
+  (run* (q) (walko '(var z) '(((var z) . cat)) q))
+  '(cat))
+
+(test "walko 2"
+  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
+  '(cat))
+
+(test "walko 3"
+  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
+  '((var (s (s (s z))))))
+
+
+
+(test "walk*o the vars"
+  (run* (q) (walk*o '((var z) . (var z)) '(((var z) . cat)) q))
+  '((cat . cat)))
+
+
+
+(test "unifyo 1"
+  (run* (subst^)
+    (unifyo 'cat 'cat '() subst^))
+  '(()))
+
+(test "unifyo 2"
+  (run* (subst^)
+    (unifyo 'cat 'dog '() subst^))
+  '(#f))
+
+(test "unifyo 3"
+  (run* (subst^)
+    (unifyo '(var z) '((var (s z))) '() subst^))
+  '((((var z) (var (s z))))))
+
+(test "unifyo 4"
+  (run* (subst^)
+    (unifyo '(var z) '((var z)) '() subst^))
+  '(#f))
+
+(test "unifyo 5"
+  (run* (subst^)
+    (unifyo '(var z) '(var z) '() subst^))
+  '(()))
+
+(test "unifyo 6"
+  (run* (subst^)
+    (unifyo '(var z) '(var (s z)) '() subst^))
+  '((((var z) . (var (s z))))))
+
+(test "unifyo 7"
+  (run* (subst^)
+    (unifyo '(var z) '((var z)) '() subst^))
+  '(#f))
+
+(test "unifyo 8"
+  (run* (subst^)
+    (unifyo '((var z)) '(var z) '() subst^))
+  '(#f))
+
+
 (test "mko-0"
   (run* (q)
     (mko '(run* (x)
@@ -166,7 +241,6 @@
                  q))
   '((cat)))
 
-;; broken
 (test "mko-8c"
   (run* (q) (mko '(run* (x)
                     (fresh (y)
@@ -175,7 +249,6 @@
                  q))
   '((cat)))
 
-;; broken
 (test "mko-9"
   (run* (q) (mko '(run* (x)
                     (fresh (y)
@@ -324,10 +397,71 @@
      (=/= ((_.2 _.3)) ((_.2 var)) ((_.3 var)))
      (sym _.0 _.1 _.2 _.3))))
 
-(test "mko backwards-2"
+(test "mko backwards-2a"
+  (run 1 (expr)
+    (fresh (e)
+      (== `(run* (q)
+             (conde
+               (,e)
+               ((== q 'dog))))
+          expr)
+      (mko expr '(cat dog))))
+  '((run* (q)
+      (conde
+        ((== 'cat q))
+        ((== q 'dog))))))
+
+(test "mko backwards-2b"
+  (run 1 (expr)
+    (fresh (e1 e2 e3 e4)
+      (== `(run* (q)
+             (conde
+               ((== ',e1 ,e2))
+               ((== ',e3 ,e4))))
+          expr)
+      (symbolo e2)
+      (symbolo e4)
+      (mko expr '(cat dog))))
+  '((run* (q)
+      (conde
+        ((== 'cat q))
+        ((== 'dog q))))))
+
+#!eof
+;; stopped here -- fix up the rest of the tests, below
+
+;; why is this so slow?
+(test "mko backwards-2c"
+  (run 1 (e1 e2 e3 e4)
+    (mko `(run* (q)
+            (conde
+              ((== ',e1 ,e2))
+              ((== ',e3 ,e4))))
+         '(cat dog)))
+  '((== 'cat q)))
+
+(test "mko backwards-2c"
+  (run 1 (e1 e2 e3 e4)
+    (mko `(run* (q)
+            (conde
+              ((== ,e1 ,e2))
+              ((== ,e3 ,e4))))
+         '(cat dog)))
+  '((== 'cat q)))
+
+(test "mko backwards-2d"
+  (run 1 (e1 e2)
+    (mko `(run* (q)
+            (conde
+              (,e1)
+              (,e2)))
+         '(cat dog)))
+  '((== 'cat q)))
+
+
+(test "mko backwards-2z"
   (run 1 (e)
-    (mko e '(cat))
-    (mko e '(dog)))
+    (mko e '(cat dog)))
   '(((run 1 (_.0)
        (conde
          ((== 'cat _.0))
@@ -336,24 +470,21 @@
 
 
 (test "eval-mko 0"
-  (run 1 (subst^)
-    (fresh (c)
-      (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
-  '(()))
+  (run 1 ($)
+    (eval-mko '(== 'cat 'cat) '() '(() . z) $))
+  '(((() . (s z)))))
 
 (test "eval-mko 1"
-  (run 1 (expr subst^)
-    (fresh (c)
-      (eval-mko expr '() 'z c '() subst^)))
-  '((((== (quote _.0) (quote _.1)) #f)
+  (run 1 (expr $)
+    (eval-mko expr '() '(() . z) $))
+  '((((== '_.0 '_.1) ())
      (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
      (sym _.0 _.1))))
 
 (test "eval-mko 2"
-  (run* (subst^)
-    (fresh (c)
-      (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
-  '(()))
+  (run* ($)
+    (eval-mko '(== 'cat 'cat) '() '(() . z) $))
+  '(((() . (s z)))))
 
 (test "eval-mko 3"
   (run* (subst^)
@@ -497,76 +628,3 @@
          (_.1)
          ((== 'dog _.0))))
      (sym _.0))))
-
-
-(test "walko the dog"
-  (run* (q) (walko 'dog '(((var z) . cat)) q))
-  '(dog))
-
-(test "walko the dogs"
-  (run* (q) (walko '(dog . dog) '(((var z) . cat)) q))
-  '((dog . dog)))
-
-(test "walko the vars"
-  (run* (q) (walko '((var z) . (var z)) '(((var z) . cat)) q))
-  '(((var z) var z)))
-
-(test "walko 1"
-  (run* (q) (walko '(var z) '(((var z) . cat)) q))
-  '(cat))
-
-(test "walko 2"
-  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
-  '(cat))
-
-(test "walko 3"
-  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
-  '((var (s (s (s z))))))
-
-
-
-(test "walk*o the vars"
-  (run* (q) (walk*o '((var z) . (var z)) '(((var z) . cat)) q))
-  '((cat . cat)))
-
-
-
-(test "unifyo 1"
-  (run* (subst^)
-    (unifyo 'cat 'cat '() subst^))
-  '(()))
-
-(test "unifyo 2"
-  (run* (subst^)
-    (unifyo 'cat 'dog '() subst^))
-  '(#f))
-
-(test "unifyo 3"
-  (run* (subst^)
-    (unifyo '(var z) '((var (s z))) '() subst^))
-  '((((var z) (var (s z))))))
-
-(test "unifyo 4"
-  (run* (subst^)
-    (unifyo '(var z) '((var z)) '() subst^))
-  '(#f))
-
-(test "unifyo 5"
-  (run* (subst^)
-    (unifyo '(var z) '(var z) '() subst^))
-  '(()))
-
-(test "unifyo 6"
-  (run* (subst^)
-    (unifyo '(var z) '(var (s z)) '() subst^))
-  '((((var z) . (var (s z))))))
-
-(test "unifyo 7"
-  (run* (subst^)
-    (unifyo '(var z) '((var z)) '() subst^))
-  '(#f))
-
-(test "unifyo 8"
-  (run* (subst^)
-    (unifyo '((var z)) '(var z) '() subst^))
-  '(#f))
