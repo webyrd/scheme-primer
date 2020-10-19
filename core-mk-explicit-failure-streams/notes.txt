@@ -20,4 +20,8 @@ Check that this does indeed work...
 *this does appear to work--see the tests in `core-mk-simple-and-complex`*  We combine two *very* different relational mk interpreters to combine speed with expressiveness.
 
 
+Try synthesizing the Judea Pearl Rifleman causal inference examples, using the code from Nada and Jeremy.
+
+
+
 Can we play similar tricks with multiple versions of Scheme interpreters, and/or type-inferencers?
