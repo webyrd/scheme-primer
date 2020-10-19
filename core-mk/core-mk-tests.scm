@@ -221,35 +221,66 @@
                 '() 'z c '() subst^)))
   '((((var z) . cat))))
 
-#|
 (test "eval-mko 6"
   (run* (subst^)
     (fresh (c)
-      (eval-mko '(fresh (x) (== x 'cat) (== 'dog x)) '() 'z c '() subst^)))
-  
-  )
+      (eval-mko '(fresh (x)
+                   (== x 'cat) (== 'dog x))
+                '() 'z c '() subst^)))
+  '())
 
 (test "eval-mko 7"
   (run* (subst^)
     (fresh (c)
-      (eval-mko '(fresh (x) (conde ((== x 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
-  
-  )
+      (eval-mko '(fresh (x)
+                   (conde
+                     ((== x 'cat))
+                     ((== x 'dog))))
+                '() 'z c '() subst^)))
+  '((((var z) . cat)) (((var z) . dog))))
 
 (test "eval-mko 8"
   (run* (subst^)
     (fresh (c)
-      (eval-mko '(fresh (x) (conde ((== 'cat 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
-  
-  )
+      (eval-mko '(fresh (x)
+                   (conde
+                     ((== 'cat 'cat))
+                     ((== x 'dog))))
+                '() 'z c '() subst^)))
+  '(() (((var z) . dog))))
 
 (test "eval-mko 9"
   (run* (subst^)
     (fresh (c)
-      (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() 'z c '() subst^)))
-  
-  )
-|#
+      (eval-mko '(conde
+                   ((== 'cat 'cat))
+                   ((== 'dog 'dog)))
+                '() 'z c '() subst^)))
+  '(() ()))
+
+(test "eval-mko 10"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x)
+                   (conde
+                     ((fresh (y)
+                        (== y 'cat)
+                        (== 'fish y)))
+                     ((== x 'dog))))
+                '() 'z c '() subst^)))
+  '((((var z) . dog))))
+
+(test "eval-mko 11"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x)
+                   (conde
+                     ((== x 'dog))
+                     ((fresh (y)
+                        (== 'fish y)
+                        (== y 'cat)))))
+                '() 'z c '() subst^)))
+  '((((var z) . dog))))
 
 (test "eval-mko backwards-1"
   (run 2 (expr)
