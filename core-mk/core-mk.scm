@@ -7,6 +7,20 @@
 ;; The `mko` driver relation simulates non-deterministic evaluation of
 ;; a `run 1` expression (not a `run*` expression!), as a single value
 ;; is associated with the query variable upon success.
+;;
+;; In order to simulate full `run*` behavior, I think it would be
+;; necessary to implement the notions of success and failure
+;; explicitly.  This implementation represents failure metacircularly,
+;; as failure at the host-level miniKanren.  Similarly, this
+;; interpreter represents `conde` and the miniKanren search
+;; metacircularly, using the host `conde`.  There seems to be tradeoff
+;; in expressiveness vs. convenience: this interpreter can't express
+;; that a miniKanren program *doesn't* produce a certain answer, for
+;; example.  Also, this interpreter can't be used to reason about
+;; setof/bagof-style 2nd order relations, since the "collected" answers
+;; are collected through the host `run`, rather than through a `run*`
+;; in the object miniKanren.  Indeed, the object `run` can only express
+;; (non-deterministic) `run 1` semantics, rather than `run*` semantics.
 
 #|
 Grammar:
