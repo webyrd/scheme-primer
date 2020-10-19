@@ -11,11 +11,7 @@
 ;; The `mko` driver relation simulates non-deterministic evaluation of
 ;; a `run 1` expression (not a `run*` expression!).
 ;;
-;; In order to simulate full `run*` behavior, I think it would be
-;; necessary to implement the notions of success and failure
-;; explicitly.  This implementation represents failure metacircularly,
-;; as failure at the host-level miniKanren.  Similarly, this
-;; interpreter represents `conde` and the miniKanren search
+;; This interpreter represents `conde` and the miniKanren search
 ;; metacircularly, using the host `conde`.  There seems to be tradeoff
 ;; in expressiveness vs. convenience: this interpreter can't express
 ;; that a miniKanren program *doesn't* produce a certain answer, for
