@@ -3,16 +3,14 @@
 
 ;; TODO:
 ;;
-;; make reification work like in regular my by using some kind of fake subst
-;; =>
-;; hmmm--how would you be able to tell whether '_.0' came from
-;; miniKanren, or the language being interpreted?
+;; Think about reification of fresh logic variables--should it work
+;; like in regular mk, by using some kind of fake subst?  If so, would
+;; you be able to tell whether '_.0' came from miniKanren, or the
+;; language being interpreted?
 ;;
+;; Support =/=, symbolo, numbero, and absento
 ;;
-;; add occur check
-;;
-;; support =/=, symbolo, numbero, and absento
-;; support helpers and recursion
+;; Support helpers and recursion
 
 (define mko
   (lambda (expr out)
@@ -33,12 +31,12 @@
       ((fresh (x e subst^^)
          (== `(fresh (,x) ,e) expr)
          (symbolo x)
-         (eval-mko e `((,x . (var ,count))) `(s ,count) count^ subst subst^)))
+         (eval-mko e `((,x . (var ,count)) . ,env) `(s ,count) count^ subst subst^)))
       ((fresh (x e1 e2 count^^ subst^^)
          (== `(fresh (,x) ,e1 ,e2) expr)
          (symbolo x)
-         (eval-mko e1 `((,x . (var ,count))) `(s ,count) count^^ subst subst^^)
-         (eval-mko e2 `((,x . (var ,count))) count^^ count^ subst^^ subst^)))
+         (eval-mko e1 `((,x . (var ,count)) . ,env) `(s ,count) count^^ subst subst^^)
+         (eval-mko e2 `((,x . (var ,count)) . ,env) count^^ count^ subst^^ subst^)))
       ((fresh (e1 e2)
          (== `(conde (,e1) (,e2)) expr)
          (conde
@@ -88,12 +86,16 @@
            (== `(var ,c1) t1^)
            (== `(,a2 . ,d2) t2^)
            (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,c1) . (,a2 . ,d2)) . ,subst) subst^)))
+           (== `(((var ,c1) . (,a2 . ,d2)) . ,subst) subst^)
+           (absento t1^ t2^) ;; use absento to implement the occurs check
+           ))
         ((fresh (c2 a1 d1)
            (== `(var ,c2) t2^)
            (== `(,a1 . ,d1) t1^)
            (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,c2) . (,a1 . ,d1)) . ,subst) subst^)))
+           (== `(((var ,c2) . (,a1 . ,d1)) . ,subst) subst^)
+           (absento t2^ t1^) ;; use absento to implement the occurs check
+           ))
         ((fresh (a1 d1 a2 d2 subst^^)
            (== `(,a1 . ,d1) t1^)
            (== `(,a2 . ,d2) t2^)
@@ -198,25 +200,16 @@
 (run 10 (expr)
   (fresh (c)
     (eval-mko expr '() 'z c '() '(((var z) . dog)))))
-;; =>
 #|
-(((fresh (_.0) (== 'dog _.0))
-  (sym _.0))
- ((fresh (_.0) (== _.0 'dog))
-  (sym _.0))
- ((fresh (_.0)
-    (== '_.1 '_.1)
-    (== 'dog _.0))
+(((fresh (_.0) (== 'dog _.0)) (sym _.0))
+ ((fresh (_.0) (== _.0 'dog)) (sym _.0))
+ ((fresh (_.0) (== '_.1 '_.1) (== 'dog _.0))
   (=/= ((_.1 var)))
   (sym _.0 _.1))
- ((fresh (_.0)
-    (== '_.1 '_.1)
-    (== _.0 'dog))
+ ((fresh (_.0) (== '_.1 '_.1) (== _.0 'dog))
   (=/= ((_.1 var)))
   (sym _.0 _.1))
- ((fresh (_.0)
-    (== 'dog _.0)
-    (== '_.1 '_.1))
+ ((fresh (_.0) (== 'dog _.0) (== '_.1 '_.1))
   (=/= ((_.1 var)))
   (sym _.0 _.1))
  ((fresh (_.0)
@@ -225,6 +218,11 @@
     (== 'dog _.0))
   (=/= ((_.2 var)))
   (sym _.0 _.1 _.2))
+ ((fresh (_.0)
+    (fresh (_.1)
+      (== 'dog _.0)))
+  (=/= ((_.0 _.1)))
+  (sym _.0 _.1))
  ((fresh (_.0)
     (fresh (_.1)
       (== '_.2 '_.2))
@@ -240,12 +238,7 @@
     (fresh (_.1)
       (== '_.2 '_.2)))
   (=/= ((_.2 var)))
-  (sym _.0 _.1 _.2))
- ((fresh (_.0)
-    (conde
-      ((== 'dog _.0))
-      (_.1)))
-  (sym _.0)))
+  (sym _.0 _.1 _.2)))
 |#
 
 (run* (q) (mko '(run* (x) (== x 'cat)) q))
@@ -253,3 +246,25 @@
 (run* (q) (mko '(run* (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
 
 (run* (q) (mko '(run* (x) (== 'cat 'cat)) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== 'cat 'cat))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== x 'cat))) q))
+
+(run* (q) (mko '(run* (x) (fresh (x) (== x 'cat))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== y 'cat))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== y 'cat) (== x y))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== x y) (== y 'cat))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x))) q))
+
+(run* (q) (mko '(run* (x) (== (cons x x) x)) q))
+
+(run* (q) (mko '(run* (x) (== x (cons x x))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x) (== x y))) q))
+
+(run* (q) (mko '(run* (x) (fresh (y) (== x y) (== (cons y y) x))) q))
