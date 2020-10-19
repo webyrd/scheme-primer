@@ -5,6 +5,7 @@
 ;;
 ;; fix variables by adding a counter to make them unique
 ;; add occur check
+;;
 ;; support =/=, symbolo, numbero, and absento
 ;; support helpers and recursion
 
