@@ -3,7 +3,8 @@
 
 ;; TODO:
 ;;
-;; fix variables by adding a counter to make them unique
+;; make reification work like in regular my by using some kind of fake subst
+;;
 ;; add occur check
 ;;
 ;; support =/=, symbolo, numbero, and absento
@@ -11,14 +12,14 @@
 
 (define mko
   (lambda (expr out)
-    (fresh (q e subst^)
+    (fresh (q e count^ subst^)
       (== `(run* (,q) ,e) expr)
       (symbolo q)
-      (eval-mko e `((,q . (var ,q))) '() subst^)
-      (walk*o `(var ,q) subst^ out))))
+      (eval-mko e `((,q . (var z))) `(s z) count^ '() subst^)
+      (walk*o `(var z) subst^ out))))
 
 (define eval-mko
-  (lambda (expr env subst subst^)
+  (lambda (expr env count count^ subst subst^)
     (conde
       ((fresh (e1 e2 t1 t2)
          (== `(== ,e1 ,e2) expr)
@@ -28,17 +29,17 @@
       ((fresh (x e subst^^)
          (== `(fresh (,x) ,e) expr)
          (symbolo x)
-         (eval-mko e `((,x . (var ,x))) subst subst^)))
-      ((fresh (x e1 e2 subst^^)
+         (eval-mko e `((,x . (var ,count))) `(s ,count) count^ subst subst^)))
+      ((fresh (x e1 e2 count^^ subst^^)
          (== `(fresh (,x) ,e1 ,e2) expr)
          (symbolo x)
-         (eval-mko e1 `((,x . (var ,x))) subst subst^^)
-         (eval-mko e2 `((,x . (var ,x))) subst^^ subst^)))
+         (eval-mko e1 `((,x . (var ,count))) `(s ,count) count^^ subst subst^^)
+         (eval-mko e2 `((,x . (var ,count))) count^^ count^ subst^^ subst^)))
       ((fresh (e1 e2)
          (== `(conde (,e1) (,e2)) expr)
          (conde
-           ((eval-mko e1 env subst subst^))
-           ((eval-mko e2 env subst subst^))))))))
+           ((eval-mko e1 env count count^ subst subst^))
+           ((eval-mko e2 env count count^ subst subst^))))))))
 
 (define evalo
   (lambda (expr env val)
@@ -67,34 +68,28 @@
       (walko t2 subst t2^)
       (conde
         ((symbolo t1^) (symbolo t2^) (== t1^ t2^) (== subst subst^))
-        ((fresh (x1 x2)
-           (== `(var ,x1) t1^)
-           (== `(var ,x2) t2^)
-           (symbolo x1)
-           (symbolo x2)
-           (== `(((var ,x1) . (var ,x2)) . ,subst) subst^)))
-        ((fresh (x1)
-           (== `(var ,x1) t1^)
-           (symbolo x1)
+        ((fresh (c1 c2)
+           (== `(var ,c1) t1^)
+           (== `(var ,c2) t2^)
+           (== `(((var ,c1) . (var ,c2)) . ,subst) subst^)))
+        ((fresh (c1)
+           (== `(var ,c1) t1^)
            (symbolo t2^) ;; t2^ is a literal symbol, not a var
-           (== `(((var ,x1) . ,t2^) . ,subst) subst^)))
-        ((fresh (x2)
-           (== `(var ,x2) t2^)
-           (symbolo x2)
+           (== `(((var ,c1) . ,t2^) . ,subst) subst^)))
+        ((fresh (c2)
+           (== `(var ,c2) t2^)
            (symbolo t1^) ;; t1^ is a literal symbol, not a var
-           (== `(((var ,x2) . ,t1^) . ,subst) subst^)))
-        ((fresh (x1 a2 d2)
-           (== `(var ,x1) t1^)
-           (symbolo x1)
+           (== `(((var ,c2) . ,t1^) . ,subst) subst^)))
+        ((fresh (c1 a2 d2)
+           (== `(var ,c1) t1^)
            (== `(,a2 . ,d2) t2^)
            (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,x1) . (,a2 . ,d2)) . ,subst) subst^)))
-        ((fresh (x2 a1 d1)
-           (== `(var ,x2) t2^)
-           (symbolo x2)
+           (== `(((var ,c1) . (,a2 . ,d2)) . ,subst) subst^)))
+        ((fresh (c2 a1 d1)
+           (== `(var ,c2) t2^)
            (== `(,a1 . ,d1) t1^)
            (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,x2) . (,a1 . ,d1)) . ,subst) subst^)))
+           (== `(((var ,c2) . (,a1 . ,d1)) . ,subst) subst^)))
         ((fresh (a1 d1 a2 d2 subst^^)
            (== `(,a1 . ,d1) t1^)
            (== `(,a2 . ,d2) t2^)
@@ -109,21 +104,19 @@
               (lambda (t s t^)
                 (conde
                   ((== '() s) (== t t^))
-                  ((fresh (y u rest)
-                     (== `(((var ,y) . ,u) . ,rest) s)
-                     (symbolo y)
+                  ((fresh (c u rest)
+                     (== `(((var ,c) . ,u) . ,rest) s)
                      (conde
-                       ((== `(var ,y) t) (walko u subst t^))
-                       ((=/= `(var ,y) t) (walk-varo t rest t^)))))))))
+                       ((== `(var ,c) t) (walko u subst t^))
+                       ((=/= `(var ,c) t) (walk-varo t rest t^)))))))))
       (conde
         ((symbolo t) (== t t^))
         ((fresh (a d)
            (== `(,a . ,d) t)
            (=/= 'var a) ;; don't mistake tagged vars for regular pairs
            (== t t^)))
-        ((fresh (x)
-           (== `(var ,x) t)
-           (symbolo x)
+        ((fresh (c)
+           (== `(var ,c) t)
            (walk-varo t subst t^)))))))
 
 (define walk*o
@@ -132,9 +125,8 @@
       (walko t subst t^^)
       (conde
         ((symbolo t^^) (== t^^ t^))
-        ((fresh (x)
-           (== `(var ,x) t^^)
-           (symbolo x)
+        ((fresh (c)
+           (== `(var ,c) t^^)
            (== t^^ t^)))
         ((fresh (a d a^ d^)
            (== `(,a . ,d) t^^)
@@ -143,72 +135,115 @@
            (walk*o a subst a^)
            (walk*o d subst d^)))))))
 
-(run* (q) (walko 'dog '(((var x) . cat)) q))
+(run* (q) (walko 'dog '(((var z) . cat)) q))
 
-(run* (q) (walko '(var x) '(((var x) . cat)) q))
+(run* (q) (walko '(var z) '(((var z) . cat)) q))
+
+(run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
+
+(run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
+
 
 (run 1 (expr subst^)
-  (eval-mko expr '() '() subst^))
+  (fresh (c)
+    (eval-mko expr '() '() 'z c subst^)))
 
 (run* (subst^)
-  (eval-mko '(== 'cat 'cat) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
 
 (run* (subst^)
-  (eval-mko '(== 'cat 'dog) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(== 'cat 'dog) '() 'z c '() subst^)))
 
 (run* (subst^)
-  (eval-mko '(fresh (x) (== x 'cat) (== 'dog 'dog)) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(fresh (x) (== x 'cat) (== 'dog 'dog)) '() 'z c '() subst^)))
+
 
 (run* (subst^)
-  (eval-mko '(fresh (x) (== x 'cat) (== 'cat x)) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(fresh (x) (== x 'cat) (== 'cat x)) '() 'z c '() subst^)))
 
 (run* (subst^)
-  (eval-mko '(fresh (x) (== x 'cat) (== 'dog x)) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(fresh (x) (== x 'cat) (== 'dog x)) '() 'z c '() subst^)))
 
 (run* (subst^)
-  (eval-mko '(fresh (x) (conde ((== x 'cat)) ((== x 'dog)))) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(fresh (x) (conde ((== x 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
+
 
 (run* (subst^)
-  (eval-mko '(fresh (x) (conde ((== 'cat 'cat)) ((== x 'dog)))) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(fresh (x) (conde ((== 'cat 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
 
 (run* (subst^)
-  (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() '() subst^))
+  (fresh (c)
+    (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() 'z c '() subst^)))
 
 (run 2 (expr)
-  (eval-mko expr '() '() '(((var x) . dog))))
+  (fresh (c)
+    (eval-mko expr '() 'z c '() '(((var z) . dog)))))
 ;; =>
 #|
-((fresh (x) (== 'dog x)) (fresh (x) (== x 'dog)))
+(((fresh (_.0) (== 'dog _.0)) (sym _.0))
+ ((fresh (_.0) (== _.0 'dog)) (sym _.0)))
 |#
 
 (run 10 (expr)
-  (eval-mko expr '() '() '(((var x) . dog))))
+  (fresh (c)
+    (eval-mko expr '() 'z c '() '(((var z) . dog)))))
 ;; =>
 #|
-((fresh (x) (== 'dog x)) (fresh (x) (== x 'dog))
- ((fresh (_.0) (fresh (x) (== 'dog x))) (sym _.0))
- ((fresh (x) (== '_.0 '_.0) (== 'dog x))
-  (=/= ((_.0 var)))
+(((fresh (_.0) (== 'dog _.0))
   (sym _.0))
- ((fresh (_.0) (fresh (x) (== x 'dog))) (sym _.0))
- ((fresh (x) (== '_.0 '_.0) (== x 'dog))
-  (=/= ((_.0 var)))
+ ((fresh (_.0) (== _.0 'dog))
   (sym _.0))
- ((fresh (x) (== 'dog x) (== '_.0 '_.0))
-  (=/= ((_.0 var)))
-  (sym _.0))
- ((fresh (x) (fresh (_.0) (== '_.1 '_.1)) (== 'dog x))
+ ((fresh (_.0)
+    (== '_.1 '_.1)
+    (== 'dog _.0))
   (=/= ((_.1 var)))
   (sym _.0 _.1))
- ((fresh (x) (fresh (_.0) (== '_.1 '_.1)) (== x 'dog))
+ ((fresh (_.0)
+    (== '_.1 '_.1)
+    (== _.0 'dog))
   (=/= ((_.1 var)))
   (sym _.0 _.1))
- ((fresh (x) (== '(_.0 . dog) (cons '_.0 x)))
-  (=/= ((_.0 var)))
+ ((fresh (_.0)
+    (== 'dog _.0)
+    (== '_.1 '_.1))
+  (=/= ((_.1 var)))
+  (sym _.0 _.1))
+ ((fresh (_.0)
+    (fresh (_.1)
+      (== '_.2 '_.2))
+    (== 'dog _.0))
+  (=/= ((_.2 var)))
+  (sym _.0 _.1 _.2))
+ ((fresh (_.0)
+    (fresh (_.1)
+      (== '_.2 '_.2))
+    (== _.0 'dog))
+  (=/= ((_.2 var)))
+  (sym _.0 _.1 _.2))
+ ((fresh (_.0)
+    (== '(_.1 . dog) (cons '_.1 _.0)))
+  (=/= ((_.1 var)))
+  (sym _.0 _.1))
+ ((fresh (_.0)
+    (== 'dog _.0)
+    (fresh (_.1)
+      (== '_.2 '_.2)))
+  (=/= ((_.2 var)))
+  (sym _.0 _.1 _.2))
+ ((fresh (_.0)
+    (conde
+      ((== 'dog _.0))
+      (_.1)))
   (sym _.0)))
 |#
 
 (run* (q) (mko '(run* (x) (== x 'cat)) q))
 
 (run* (q) (mko '(run* (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
-
