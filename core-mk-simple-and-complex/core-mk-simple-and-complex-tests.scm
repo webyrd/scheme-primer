@@ -236,6 +236,86 @@
      (=/= ((_.0 x)))
      (sym _.0))))
 
+(test "mko-simple and mko-complex combined tests 1f"
+  (run 5 (e)
+    (fresh (simple-expr complex-expr l e1 e2)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (=/= e1 e2)
+      (mko-simple simple-expr e1)
+      (mko-simple simple-expr e2)
+      (== (list e1 e2) l)
+      (mko-complex complex-expr l)))
+  '(((conde
+       ((== '_.0 '_.0))
+       ((== '_.1 x)))
+     (=/= ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))
+    ((conde
+       ((== '_.0 '_.0))
+       ((== x '_.1)))
+     (=/= ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))
+    ((conde
+       ((== '_.0 '_.0))
+       ((== '() x)))
+     (=/= ((_.0 var)))
+     (sym _.0))
+    ((conde
+       ((== '_.0 '_.0))
+       ((== '(_.1 . _.2) x)))
+     (=/= ((_.0 var)) ((_.1 var)) ((_.2 var)))
+     (sym _.0 _.1 _.2))
+    ((conde
+       ((== '_.0 '_.0))
+       ((== '(_.1) x)))
+     (=/= ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))))
+
+(test "mko-simple and mko-complex combined tests 1g"
+  (run 5 (e)
+    (fresh (simple-expr complex-expr l e1 e2)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (symbolo e1)
+      (symbolo e2)
+      (=/= e1 e2)
+      (mko-simple simple-expr e1)
+      (mko-simple simple-expr e2)
+      (== (list e1 e2) l)
+      (mko-complex complex-expr l)))
+  '(((conde
+       ((== '_.0 x))
+       ((== '_.1 x)))
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))
+    ((conde
+       ((== '_.0 x))
+       ((== x '_.1)))
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))
+    ((conde
+       ((== '_.0 x))
+       ((fresh (_.1)
+          (== '_.2 x))))
+     (=/= ((_.0 _.2)) ((_.0 var)) ((_.1 x)) ((_.2 var)))
+     (sym _.0 _.1 _.2))
+    ((conde
+       ((== '_.0 x))
+       ((conde
+          ((== '_.1 x))
+          ((== '_.2 '_.3)))))
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)) ((_.2 _.3))
+          ((_.2 var)) ((_.3 var)))
+     (sym _.0 _.1 _.2 _.3))
+    ((conde
+       ((== '_.0 x))
+       ((conde
+          ((== '_.1 x))
+          ((== '_.2 '())))))
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)) ((_.2 var)))
+     (sym _.0 _.1 _.2))))
+
 (test "mko-simple and mko-complex combined tests 2"
   (run 1 (e)
     (fresh (simple-expr complex-expr)
