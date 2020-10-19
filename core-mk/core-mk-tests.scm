@@ -47,7 +47,12 @@
                  q))
   '((dog . cat)))
 
-;; broken!  should support the quoted empty list
+(test "mko-11a"
+  (run* (q) (mko '(run 1 (x)
+                    (== '() x))
+                 q))
+  '(()))
+
 (test "mko-11"
   (run* (q) (mko '(run 1 (x)
                     (fresh (y)
@@ -57,6 +62,27 @@
                       (== y 'dog)))
                  q))
   '((dog cat)))
+
+(test "mko-12"
+  (run* (q) (mko '(run 1 (x) (== '(cat) x)) q))
+  '((cat)))
+
+(test "mko-13"
+  (run* (q) (mko '(run 1 (x) (== '(cat dog fish) x)) q))
+  '((cat dog fish)))
+
+(test "mko-14"
+  (run* (q) (mko '(run 1 (x) (== '(cat dog . fish) x)) q))
+  '((cat dog . fish)))
+
+(test "mko-15"
+  (run* (q) (mko '(run 1 (x) (== '(cat dog . fish) (cons x '(dog . fish)))) q))
+  '(cat))
+
+(test "mko-16"
+  (run* (q) (mko '(run 1 (x) (== (cons x '(dog . fish)) '(cat dog . fish))) q))
+  '(cat))
+
 
 (test "mko unify x with itself"
   (run* (q) (mko '(run 1 (x) (== x x)) q))
@@ -108,10 +134,6 @@
      (=/= ((_.0 _.1)))
      (sym _.0 _.1))
     ((run 1 (_.0)
-       (== '(_.1 . cat) (cons '_.1 _.0)))
-     (=/= ((_.1 var)))
-     (sym _.0 _.1))
-    ((run 1 (_.0)
        (conde
          ((== 'cat _.0))
          (_.1)))
@@ -122,7 +144,7 @@
          ((== 'cat _.0))))
      (sym _.0))
     ((run 1 (_.0)
-       (== '(cat . _.1) (cons _.0 '_.1)))
+       (== '(_.1 . cat) (cons '_.1 _.0)))
      (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((run 1 (_.0)
@@ -136,9 +158,12 @@
          ((== _.0 'cat))))
      (sym _.0))
     ((run 1 (_.0)
-       (== '((_.1 . _.2) . cat) (cons '(_.1 . _.2) _.0)))
-     (=/= ((_.1 var)) ((_.2 var)))
-     (sym _.0 _.1 _.2))))
+       (== '(cat . _.1) (cons _.0 '_.1)))
+     (=/= ((_.1 var)))
+     (sym _.0 _.1))
+    ((run 1 (_.0)
+       (== '(() . cat) (cons '() _.0)))
+     (sym _.0))))
 
 (test "mko backwards-2"
   (run 1 (e)
@@ -239,15 +264,18 @@
   (run 10 (expr)
     (fresh (c)
       (eval-mko expr '() 'z c '() '(((var z) . dog)))))
-  '(((fresh (_.0) (== 'dog _.0)) (sym _.0))
-    ((fresh (_.0) (== _.0 'dog)) (sym _.0))
-    ((fresh (_.0) (== '_.1 '_.1) (== 'dog _.0))
+  '(((fresh (_.0) (== 'dog _.0))
+     (sym _.0))
+    ((fresh (_.0) (== _.0 'dog))
+     (sym _.0))
+    ((fresh (_.0)
+       (== '_.1 '_.1)
+       (== 'dog _.0))
      (=/= ((_.1 var)))
      (sym _.0 _.1))
-    ((fresh (_.0) (== '_.1 '_.1) (== _.0 'dog))
-     (=/= ((_.1 var)))
-     (sym _.0 _.1))
-    ((fresh (_.0) (== 'dog _.0) (== '_.1 '_.1))
+    ((fresh (_.0)
+       (== '_.1 '_.1)
+       (== _.0 'dog))
      (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((fresh (_.0)
@@ -257,9 +285,9 @@
      (=/= ((_.2 var)))
      (sym _.0 _.1 _.2))
     ((fresh (_.0)
-       (fresh (_.1)
-         (== 'dog _.0)))
-     (=/= ((_.0 _.1)))
+       (== 'dog _.0)
+       (== '_.1 '_.1))
+     (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((fresh (_.0)
        (fresh (_.1)
@@ -268,15 +296,20 @@
      (=/= ((_.2 var)))
      (sym _.0 _.1 _.2))
     ((fresh (_.0)
-       (== '(_.1 . dog) (cons '_.1 _.0)))
-     (=/= ((_.1 var)))
+       (fresh (_.1)
+         (== 'dog _.0)))
+     (=/= ((_.0 _.1)))
      (sym _.0 _.1))
     ((fresh (_.0)
-       (== 'dog _.0)
-       (fresh (_.1)
-         (== '_.2 '_.2)))
-     (=/= ((_.2 var)))
-     (sym _.0 _.1 _.2))))
+       (conde
+         ((== 'dog _.0))
+         (_.1)))
+     (sym _.0))
+    ((conde
+       ((fresh (_.0)
+          (== 'dog _.0)))
+       (_.1))
+     (sym _.0))))
 
 
 

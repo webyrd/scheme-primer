@@ -37,6 +37,10 @@ run1-expr ::= (run 1 (<x>) <ge>)
         (cons <e> <e>)
 
 <x> ::= <symbol>
+
+<datum> ::= <symbol> |
+            () |
+            (<datum> . <datum>)
 |#
 
 ;; Logic variables are represented as tagged lists of the form `(var ,c)`
@@ -90,7 +94,8 @@ run1-expr ::= (run 1 (<x>) <ge>)
 (define evalo
   (lambda (expr env val)
     (conde
-      ((== `(quote ,val) expr) (absento 'var val))
+      ((== `(quote ,val) expr)
+       (absento 'var val))
       ((symbolo expr) (lookupo expr env val))
       ((fresh (e1 e2 v1 v2)
          (== `(cons ,e1 ,e2) expr)
@@ -114,6 +119,7 @@ run1-expr ::= (run 1 (<x>) <ge>)
       (walko t2 subst t2^)
       (conde
         ((symbolo t1^) (symbolo t2^) (== t1^ t2^) (== subst subst^))
+        ((== '() t1^) (== '() t2^) (== subst subst^))
         ((fresh (c1 c2)
            (== `(var ,c1) t1^)
            (== `(var ,c2) t2^)
@@ -127,6 +133,14 @@ run1-expr ::= (run 1 (<x>) <ge>)
         ((fresh (c2)
            (== `(var ,c2) t2^)
            (symbolo t1^) ;; t1^ is a literal symbol, not a var
+           (== `(((var ,c2) . ,t1^) . ,subst) subst^)))
+        ((fresh (c1)
+           (== `(var ,c1) t1^)
+           (== '() t2^)
+           (== `(((var ,c1) . ,t2^) . ,subst) subst^)))
+        ((fresh (c2)
+           (== `(var ,c2) t2^)
+           (== '() t1^)
            (== `(((var ,c2) . ,t1^) . ,subst) subst^)))
         ((fresh (c1 a2 d2)
            (== `(var ,c1) t1^)
@@ -163,6 +177,7 @@ run1-expr ::= (run 1 (<x>) <ge>)
                        ((=/= `(var ,c) t) (walk-varo t rest t^)))))))))
       (conde
         ((symbolo t) (== t t^))
+        ((== '() t) (== t t^))
         ((fresh (a d)
            (== `(,a . ,d) t)
            (=/= 'var a) ;; don't mistake tagged vars for regular pairs
@@ -177,6 +192,7 @@ run1-expr ::= (run 1 (<x>) <ge>)
       (walko t subst t^^)
       (conde
         ((symbolo t^^) (== t^^ t^))
+        ((== '() t^^) (== t^^ t^))
         ((fresh (c)
            (== `(var ,c) t^^)
            (== t^^ t^)))
