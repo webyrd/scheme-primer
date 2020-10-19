@@ -262,9 +262,17 @@
 
 (run* (q) (mko '(run* (x) (fresh (y) (== x y) (== y 'cat))) q))
 
-(run* (q) (mko '(run* (x) (== x x)) q))
+(test "mko unify x with itself"
+  (run* (q) (mko '(run* (x) (== x x)) q))
+  '((var z)))
 
-(run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x))) q))
+(test "mko unify x with (cons y y)"
+  (run* (q)
+    (mko '(run* (x)
+            (fresh (y)
+              (== (cons y y) x)))
+         q))
+  '(((var (s z)) var (s z))))
 
 (test "mko occur-check-1"
   (run* (q) (mko '(run* (x) (== (cons x x) x)) q))
@@ -293,16 +301,6 @@
   '())
 
 (test "mko backwards-1"
-  (run 1 (e)
-    (mko e 'cat)
-    (mko e 'dog))
-  '(((run* (_.0)
-       (conde
-         ((== 'cat _.0))
-         ((== 'dog _.0))))
-     (sym _.0))))
-
-(test "mko backwards-2"
   (run 10 (e) (mko e 'cat))
   '(((run* (_.0) (== 'cat _.0))
      (sym _.0))
@@ -345,3 +343,13 @@
        (== '((_.1 . _.2) . cat) (cons '(_.1 . _.2) _.0)))
      (=/= ((_.1 var)) ((_.2 var)))
      (sym _.0 _.1 _.2))))
+
+(test "mko backwards-2"
+  (run 1 (e)
+    (mko e 'cat)
+    (mko e 'dog))
+  '(((run* (_.0)
+       (conde
+         ((== 'cat _.0))
+         ((== 'dog _.0))))
+     (sym _.0))))
