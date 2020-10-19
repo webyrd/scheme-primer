@@ -266,13 +266,24 @@
 
 (run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x))) q))
 
-(run* (q) (mko '(run* (x) (== (cons x x) x)) q))
+(test "mko occur-check-1"
+  (run* (q) (mko '(run* (x) (== (cons x x) x)) q))
+  '())
 
-(run* (q) (mko '(run* (x) (== x (cons x x))) q))
+(test "mko occur-check-2"
+  (run* (q) (mko '(run* (x) (== x (cons x x))) q))
+  '())
 
-(run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x) (== x y))) q))
+(test "mko occur-check-3"
+  (run* (q)
+    (mko '(run* (x)
+            (fresh (y)
+              (== (cons y y) x)
+              (== x y)))
+         q))
+  '())
 
-(test "occur-check-1"
+(test "mko occur-check-4"
   (run* (q)
     (mko '(run* (x)
             (fresh (y)
@@ -281,7 +292,7 @@
          q))
   '())
 
-(test "1"
+(test "mko backwards-1"
   (run 1 (e)
     (mko e 'cat)
     (mko e 'dog))
@@ -291,7 +302,7 @@
          ((== 'dog _.0))))
      (sym _.0))))
 
-(test "2"
+(test "mko backwards-2"
   (run 10 (e) (mko e 'cat))
   '(((run* (_.0) (== 'cat _.0))
      (sym _.0))
