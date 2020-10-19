@@ -66,12 +66,7 @@ run1-expr ::= (run* (<x>) <ge>)
      '(() . (s z))
      ;; resulting stream of s/c's
      $)
-    
-    ;; TODO -- `walk*` the query variable over the stream of s/c's
-    ;; For now we will punt, and just unify `out` with the entire stream.
-    (== $ out)
-    
-    ))
+    (map-walk*o `(var z) $ out)))
 
 (define (eval-mko expr env s/c $)
   (conde
@@ -322,3 +317,12 @@ run1-expr ::= (run* (<x>) <ge>)
          (== `(,a^ . ,d^) t^)
          (walk*o a subst a^)
          (walk*o d subst d^))))))
+
+(define (map-walk*o t $ out)
+  (conde
+    ((== '() $) (== '() out))
+    ((fresh (s c rest res t^)
+       (== `((,s . ,c) . ,rest) $)
+       (== `(,t^ . ,res) out)
+       (walk*o t s t^)
+       (map-walk*o t rest res)))))

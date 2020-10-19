@@ -20,7 +20,7 @@
 ;; can we do better?
 (test "mko-1b"
   (run 1 (e)
-    (mko `(run 1 (x)
+    (mko `(run* (x)
             (== ',e x))
          '(cat)))
   '(cat))
