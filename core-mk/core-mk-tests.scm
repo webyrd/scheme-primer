@@ -14,7 +14,9 @@
          'cat))
   '(cat))
 
-;; run 2 appears to diverge
+;; `run 2` appears to diverge, which is expected, since there are
+;; infinitely many expressions `e`, and only 'cat will satisfy the
+;; `==` constraint.
 (test "mko-1c"
   (run 1 (e)
     (mko `(run 1 (x)
