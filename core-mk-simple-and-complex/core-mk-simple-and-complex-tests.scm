@@ -316,6 +316,56 @@
      (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)) ((_.2 var)))
      (sym _.0 _.1 _.2))))
 
+(test "mko-simple and mko-complex combined tests 1h"
+  ;; no membero needed!
+  (run 5 (e)
+    (fresh (simple-expr complex-expr l e1 e2 e3)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (=/= e1 e2)
+      (=/= e1 e3)
+      (=/= e2 e3)
+      (symbolo e3)
+      (mko-simple simple-expr e3)
+      (== (list e1 e2 e3) l)
+      (mko-complex complex-expr l)))
+  '(((conde
+       ((== 'cat x))
+       ((conde
+          ((== 'dog x))
+          ((== '_.0 x)))))
+     (=/= ((_.0 cat)) ((_.0 dog)) ((_.0 var)))
+     (sym _.0))
+    ((conde
+       ((== 'cat x))
+       ((conde
+          ((== '_.0 '_.0))
+          ((== 'dog x)))))
+     (=/= ((_.0 var)))
+     (sym _.0))
+    ((conde
+       ((== 'cat x))
+       ((conde
+          ((== 'dog x))
+          ((== x '_.0)))))
+     (=/= ((_.0 cat)) ((_.0 dog)) ((_.0 var)))
+     (sym _.0))
+    ((conde
+       ((== 'cat x))
+       ((conde
+          ((fresh (_.0)
+             (== '_.1 '_.1)))
+          ((== 'dog x)))))
+     (=/= ((_.1 var)))
+     (sym _.0 _.1))
+    (conde
+      ((== 'cat x))
+      ((conde
+         ((== '() '()))
+         ((== 'dog x)))))))
+
 (test "mko-simple and mko-complex combined tests 2"
   (run 1 (e)
     (fresh (simple-expr complex-expr)
