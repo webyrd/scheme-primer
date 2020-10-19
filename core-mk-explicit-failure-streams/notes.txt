@@ -1,0 +1,20 @@
+How can we make synthesis of miniKanren expressions much faster?
+
+An idea! We shoul be able to combine the `mko` relations from `core-mk.scm`, `core-mk-explicit-failure`, and `core-mk-explicit-failure-streams.scm`.  This should let us combine efficiency with expressiveness.
+
+For example,
+
+(run 1 (e)
+  (mko `(run 1 (q) ,e) 'cat)      ;; mko from core-mk.scm
+  (mko `(run 1 (q) ,e) 'dog)      ;; mko from core-mk.scm
+  (mko `(run* (q) ,e) '(cat dog)) ;; mko from core-mk-explicit-failure-streams-tests.scm
+  )
+
+The idea here is that the first two mko calls from core-mk.scm can efficiently generate the conde and unifications, as in the "mko backwards-2" test in core-mk-tests.scm.  The mko call from core-mk-explicit-failure-streams-tests.scm can then be used to specify that the synthesized expression must not produce any other values that 'cat and 'dog (although the expression could contain an arbitrary number of failing conde branches).
+
+See the "mko forwards unclosed" test in core-mk-tests.scm to see how the expressions can't be "closed" in the core-mk-tests.scm code--there is no way to expression that the run expression should be capable of producting 'cat' and 'dog' as answers, but *nothing else*.
+
+
+Check that this does indeed work...
+
+Can we play similar tricks with multiple versions of Scheme interpreters, and/or type-inferencers?
