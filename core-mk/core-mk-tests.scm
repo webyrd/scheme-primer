@@ -1,23 +1,41 @@
 (load "core-mk.scm")
 (load "../faster-miniKanren/test-check.scm")
 
-(run* (q) (mko '(run 1 (x) (== x 'cat)) q))
+(test "mko-1"
+  (run* (q) (mko '(run 1 (x) (== x 'cat)) q))
+  '(cat))
 
-(run* (q) (mko '(run 1 (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
+(test "mko-2"
+  (run* (q) (mko '(run 1 (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
+  '(cat dog))
 
-(run* (q) (mko '(run 1 (x) (== 'cat 'cat)) q))
+(test "mko-3"
+  (run* (q) (mko '(run 1 (x) (== 'cat 'cat)) q))
+  '((var z)))
 
-(run* (q) (mko '(run 1 (x) (fresh (y) (== 'cat 'cat))) q))
+(test "mko-4"
+  (run* (q) (mko '(run 1 (x) (fresh (y) (== 'cat 'cat))) q))
+  '((var z)))
 
-(run* (q) (mko '(run 1 (x) (fresh (y) (== x 'cat))) q))
+(test "mko-5"
+  (run* (q) (mko '(run 1 (x) (fresh (y) (== x 'cat))) q))
+  '(cat))
 
-(run* (q) (mko '(run 1 (x) (fresh (x) (== x 'cat))) q))
+(test "mko-6"
+  (run* (q) (mko '(run 1 (x) (fresh (x) (== x 'cat))) q))
+  '((var z)))
 
-(run* (q) (mko '(run 1 (x) (fresh (y) (== y 'cat))) q))
+(test "mko-7"
+  (run* (q) (mko '(run 1 (x) (fresh (y) (== y 'cat))) q))
+  '((var z)))
 
-(run* (q) (mko '(run 1 (x) (fresh (y) (== y 'cat) (== x y))) q))
+(test "mko-8"
+  (run* (q) (mko '(run 1 (x) (fresh (y) (== y 'cat) (== x y))) q))
+  '(cat))
 
-(run* (q) (mko '(run 1 (x) (fresh (y) (== x y) (== y 'cat))) q))
+(test "mko-9"
+  (run* (q) (mko '(run 1 (x) (fresh (y) (== x y) (== y 'cat))) q))
+  '(cat))
 
 (test "mko unify x with itself"
   (run* (q) (mko '(run 1 (x) (== x x)) q))
