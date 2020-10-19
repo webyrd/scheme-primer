@@ -7,6 +7,21 @@
                  q))
   '(cat))
 
+(test "mko-1b"
+  (run* (e)
+    (mko `(run 1 (x)
+            (== ',e x))
+         'cat))
+  '(cat))
+
+;; run 2 appears to diverge
+(test "mko-1c"
+  (run 1 (e)
+    (mko `(run 1 (x)
+            (== ,e x))
+         'cat))
+  '('cat))
+
 (test "mko-2"
   (run* (q) (mko '(run 1 (x)
                     (conde
