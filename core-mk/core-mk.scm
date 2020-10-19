@@ -1,5 +1,6 @@
 (load "../faster-miniKanren/mk-vicare.scm")
 (load "../faster-miniKanren/mk.scm")
+(load "../faster-miniKanren/test-check.scm")
 
 ;; TODO:
 ;;
@@ -271,62 +272,65 @@
 
 (run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x) (== x y))) q))
 
-(run* (q) (mko '(run* (x) (fresh (y) (== x y) (== (cons y y) x))) q))
+(test "occur-check-1"
+  (run* (q)
+    (mko '(run* (x)
+            (fresh (y)
+              (== x y)
+              (== (cons y y) x)))
+         q))
+  '())
 
-(run 10 (e) (mko e 'cat))
-;; =>
-#|
-(((run* (_.0) (== 'cat _.0))
-  (sym _.0))
- ((run* (_.0) (== _.0 'cat))
-  (sym _.0))
- ((run* (_.0)
-    (fresh (_.1)
-      (== 'cat _.0)))
-  (=/= ((_.0 _.1)))
-  (sym _.0 _.1))
- ((run* (_.0)
-    (== '(_.1 . cat) (cons '_.1 _.0)))
-  (=/= ((_.1 var)))
-  (sym _.0 _.1))
- ((run* (_.0)
-    (conde
-      ((== 'cat _.0))
-      (_.1)))
-  (sym _.0))
- ((run* (_.0)
-    (conde
-      (_.1)
-      ((== 'cat _.0))))
-  (sym _.0))
- ((run* (_.0)
-    (== '(cat . _.1) (cons _.0 '_.1)))
-  (=/= ((_.1 var)))
-  (sym _.0 _.1))
- ((run* (_.0)
-    (conde
-      ((== _.0 'cat))
-      (_.1)))
-  (sym _.0))
- ((run* (_.0)
-    (conde
-      (_.1)
-      ((== _.0 'cat))))
-  (sym _.0))
- ((run* (_.0)
-    (== '((_.1 . _.2) . cat) (cons '(_.1 . _.2) _.0)))
-  (=/= ((_.1 var)) ((_.2 var)))
-  (sym _.0 _.1 _.2)))
-|#
+(test "1"
+  (run 1 (e)
+    (mko e 'cat)
+    (mko e 'dog))
+  '(((run* (_.0)
+       (conde
+         ((== 'cat _.0))
+         ((== 'dog _.0))))
+     (sym _.0))))
 
-(run 1 (e)
-  (mko e 'cat)
-  (mko e 'dog))
-;; =>
-#|
-(((run* (_.0)
-    (conde
-      ((== 'cat _.0))
-      ((== 'dog _.0))))
-  (sym _.0)))
-|#
+(test "2"
+  (run 10 (e) (mko e 'cat))
+  '(((run* (_.0) (== 'cat _.0))
+     (sym _.0))
+    ((run* (_.0) (== _.0 'cat))
+     (sym _.0))
+    ((run* (_.0)
+       (fresh (_.1)
+         (== 'cat _.0)))
+     (=/= ((_.0 _.1)))
+     (sym _.0 _.1))
+    ((run* (_.0)
+       (== '(_.1 . cat) (cons '_.1 _.0)))
+     (=/= ((_.1 var)))
+     (sym _.0 _.1))
+    ((run* (_.0)
+       (conde
+         ((== 'cat _.0))
+         (_.1)))
+     (sym _.0))
+    ((run* (_.0)
+       (conde
+         (_.1)
+         ((== 'cat _.0))))
+     (sym _.0))
+    ((run* (_.0)
+       (== '(cat . _.1) (cons _.0 '_.1)))
+     (=/= ((_.1 var)))
+     (sym _.0 _.1))
+    ((run* (_.0)
+       (conde
+         ((== _.0 'cat))
+         (_.1)))
+     (sym _.0))
+    ((run* (_.0)
+       (conde
+         (_.1)
+         ((== _.0 'cat))))
+     (sym _.0))
+    ((run* (_.0)
+       (== '((_.1 . _.2) . cat) (cons '(_.1 . _.2) _.0)))
+     (=/= ((_.1 var)) ((_.2 var)))
+     (sym _.0 _.1 _.2))))
