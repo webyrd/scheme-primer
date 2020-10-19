@@ -73,7 +73,9 @@
         ((fresh (c1 c2)
            (== `(var ,c1) t1^)
            (== `(var ,c2) t2^)
-           (== `(((var ,c1) . (var ,c2)) . ,subst) subst^)))
+           (conde
+             ((== c1 c2) (== subst subst^))
+             ((=/= c1 c2) (== `(((var ,c1) . (var ,c2)) . ,subst) subst^)))))
         ((fresh (c1)
            (== `(var ,c1) t1^)
            (symbolo t2^) ;; t2^ is a literal symbol, not a var
@@ -258,6 +260,8 @@
 (run* (q) (mko '(run* (x) (fresh (y) (== y 'cat) (== x y))) q))
 
 (run* (q) (mko '(run* (x) (fresh (y) (== x y) (== y 'cat))) q))
+
+(run* (q) (mko '(run* (x) (== x x)) q))
 
 (run* (q) (mko '(run* (x) (fresh (y) (== (cons y y) x))) q))
 
