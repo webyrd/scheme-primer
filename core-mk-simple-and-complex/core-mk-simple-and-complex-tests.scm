@@ -207,6 +207,35 @@
      (=/= ((_.0 x)))
      (sym _.0))))
 
+(test "mko-simple and mko-complex combined tests 1e"
+  ;; no membero needed!
+  (run 5 (e)
+    (fresh (simple-expr complex-expr l e1 e2)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (== (list e1 e2) l)
+      (mko-complex complex-expr l)))
+  '((conde
+      ((== 'cat x))
+      ((== 'dog x)))
+    (conde
+      ((== 'cat x))
+      ((== x 'dog)))
+    (conde
+      ((== 'dog x))
+      ((== 'cat x)))
+    (conde
+      ((== x 'dog))
+      ((== 'cat x)))
+    ((conde
+       ((== 'cat x))
+       ((fresh (_.0)
+          (== 'dog x))))
+     (=/= ((_.0 x)))
+     (sym _.0))))
+
 (test "mko-simple and mko-complex combined tests 2"
   (run 1 (e)
     (fresh (simple-expr complex-expr)
