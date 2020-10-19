@@ -1,6 +1,36 @@
 (load "../faster-miniKanren/mk-vicare.scm")
 (load "../faster-miniKanren/mk.scm")
 
+;; Relational environment-passing, substitution-passing interpreter
+;; for a subset of miniKanren, written in miniKanren.
+;;
+;; The `mko` driver relation simulates non-deterministic evaluation of
+;; a `run 1` expression (not a `run*` expression!), as a single value
+;; is associated with the query variable upon success.
+
+#|
+Grammar:
+
+run1-expr ::= (run 1 (<x>) <ge>)
+
+<ge> ::= (== <e> <e>) |
+         (fresh (<x>) <ge>) |
+         (fresh (<x>) <ge> <ge>) |
+         (conde (<ge>) (<ge>))
+
+<e> ::= <x> |
+        (quote <datum>) |
+        (cons <e> <e>)
+
+<x> ::= <symbol>
+|#
+
+;; Logic variables are represented as tagged lists of the form `(var ,c)`
+;; where `c` is a Peano numeral of the form `z`, `(s z)`, `(s (s z))`, etc.
+;; Logic variables that remain fresh are reified as themselves, rather than
+;; being replaced with `_.0`, `_.1`, etc.
+
+
 ;; TODO:
 ;;
 ;; Think about reification of fresh logic variables--should it work
@@ -15,7 +45,7 @@
 (define mko
   (lambda (expr out)
     (fresh (q e count^ subst^)
-      (== `(run* (,q) ,e) expr)
+      (== `(run 1 (,q) ,e) expr)
       (symbolo q)
       (eval-mko e `((,q . (var z))) `(s z) count^ '() subst^)
       (walk*o `(var z) subst^ out))))
