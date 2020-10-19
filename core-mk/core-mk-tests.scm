@@ -220,6 +220,45 @@
          ((== 'dog _.0))))
      (sym _.0))))
 
+;; there is no way to make this test fail using core.mk.scm, since we
+;; can only use mko to express which values *must* be produced, and
+;; cannot express that these must be the only values produced
+(test "mko forwards unclosed 0"
+  (run 1 (expr)
+    (fresh (e)
+      (== `(run 1 (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  ((== 'fish x))))))
+          expr)
+      (mko expr 'cat)
+      (mko expr 'dog)))
+  '((run 1 (x)
+      (conde
+        ((== 'cat x))
+        ((conde ((== 'dog x)) ((== 'fish x))))))))
+
+(test "mko forwards unclosed 1"
+  (run 1 (expr)
+    (fresh (e)
+      (== `(run 1 (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  (,e)))))
+          expr)
+      (mko expr 'cat)
+      (mko expr 'dog)))
+  '((run 1 (x)
+      (conde
+        ((== 'cat x))
+        ((conde
+           ((== 'dog x))
+           (_.0)))))))
+
 
 (test "eval-mko 0"
   (run 1 (subst^)

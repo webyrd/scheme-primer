@@ -427,6 +427,82 @@
         ((== 'cat q))
         ((== 'dog q))))))
 
+;; core-mk-explicit-failure-explicit-streams.scm allows us to express closure properly
+(test "mko forwards unclosed 0a"
+  (run* (expr)
+    (fresh (e)
+      (== `(run* (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  ((== 'fish x))))))
+          expr)
+      (mko expr '(cat dog fish))))
+  '((run* (x)
+      (conde
+        ((== (quote cat) x))
+        ((conde
+           ((== (quote dog) x))
+           ((== (quote fish) x))))))))
+
+;; core-mk-explicit-failure-explicit-streams.scm allows us to express closure properly
+(test "mko forwards unclosed 0b"
+  (run* (expr)
+    (fresh (e)
+      (== `(run* (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  ((== 'fish x))))))
+          expr)
+      (mko expr '(cat dog))))
+  '())
+
+;; core-mk-explicit-failure-explicit-streams.scm allows us to express closure properly
+(test "mko forwards unclosed 1a"
+  (run 1 (expr)
+    (fresh (e)
+      (== `(run* (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  (,e)))))
+          expr)
+      (mko expr '(cat dog fish))))
+  '((run* (x)
+      (conde
+        ((== 'cat x))
+        ((conde
+           ((== 'dog x))
+           ((== 'fish x))))))))
+
+;; core-mk-explicit-failure-explicit-streams.scm allows us to express closure properly
+;;
+;; The invented clause fails!
+(test "mko forwards unclosed 1b"
+  (run 1 (expr)
+    (fresh (e)
+      (== `(run* (x)
+             (conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  (,e)))))
+          expr)
+      (mko expr '(cat dog))))
+  '(((run* (x)
+       (conde
+         ((== 'cat x))
+         ((conde
+            ((== 'dog x))
+            ((== '_.0 '_.1))))))
+   (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
+   (sym _.0 _.1))))
+
+
 #!eof
 ;; stopped here -- fix up the rest of the tests, below
 
