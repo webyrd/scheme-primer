@@ -37,6 +37,27 @@
   (run* (q) (mko '(run 1 (x) (fresh (y) (== x y) (== y 'cat))) q))
   '(cat))
 
+(test "mko-10"
+  (run* (q) (mko '(run 1 (x)
+                    (fresh (y)
+                      (fresh (z)
+                        (== (cons y z) x)
+                        (== z 'cat))
+                      (== y 'dog)))
+                 q))
+  '((dog . cat)))
+
+;; broken!  should support the quoted empty list
+(test "mko-11"
+  (run* (q) (mko '(run 1 (x)
+                    (fresh (y)
+                      (fresh (z)
+                        (== (cons y (cons z '())) x)
+                        (== z 'cat))
+                      (== y 'dog)))
+                 q))
+  '((dog cat)))
+
 (test "mko unify x with itself"
   (run* (q) (mko '(run 1 (x) (== x x)) q))
   '((var z)))
@@ -130,44 +151,80 @@
      (sym _.0))))
 
 
+(test "eval-mko 0"
+  (run 1 (subst^)
+    (fresh (c)
+      (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
+  '(()))
 
-(run 1 (expr subst^)
-  (fresh (c)
-    (eval-mko expr '() '() 'z c subst^)))
-
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
-
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(== 'cat 'dog) '() 'z c '() subst^)))
-
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(fresh (x) (== x 'cat) (== 'dog 'dog)) '() 'z c '() subst^)))
+(test "eval-mko 1"
+  (run 1 (expr subst^)
+    (fresh (c)
+      (eval-mko expr '() 'z c '() subst^)))
+  '((((== '_.0 '_.0) ())
+     (=/= ((_.0 var))) (sym _.0))))
 
 
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(fresh (x) (== x 'cat) (== 'cat x)) '() 'z c '() subst^)))
+(test "eval-mko 2"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(== 'cat 'cat) '() 'z c '() subst^)))
+  '(()))
 
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(fresh (x) (== x 'cat) (== 'dog x)) '() 'z c '() subst^)))
-
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(fresh (x) (conde ((== x 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
+(test "eval-mko 3"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(== 'cat 'dog) '() 'z c '() subst^)))
+  '())
 
 
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(fresh (x) (conde ((== 'cat 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
+(test "eval-mko 4"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x)
+                   (== x 'cat)
+                   (== 'dog 'dog))
+                '() 'z c '() subst^)))
+  '((((var z) . cat))))
 
-(run* (subst^)
-  (fresh (c)
-    (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() 'z c '() subst^)))
+(test "eval-mko 5"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x)
+                   (== x 'cat)
+                   (== 'cat x))
+                '() 'z c '() subst^)))
+  '((((var z) . cat))))
+
+#|
+(test "eval-mko 6"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x) (== x 'cat) (== 'dog x)) '() 'z c '() subst^)))
+  
+  )
+
+(test "eval-mko 7"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x) (conde ((== x 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
+  
+  )
+
+(test "eval-mko 8"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(fresh (x) (conde ((== 'cat 'cat)) ((== x 'dog)))) '() 'z c '() subst^)))
+  
+  )
+
+(test "eval-mko 9"
+  (run* (subst^)
+    (fresh (c)
+      (eval-mko '(conde ((== 'cat 'cat)) ((== 'dog 'dog))) '() 'z c '() subst^)))
+  
+  )
+|#
 
 (test "eval-mko backwards-1"
   (run 2 (expr)
@@ -223,8 +280,6 @@
 
 
 
-
-
 (test "walko the dog"
   (run* (q) (walko 'dog '(((var z) . cat)) q))
   '(dog))
@@ -237,13 +292,27 @@
   (run* (q) (walko '((var z) . (var z)) '(((var z) . cat)) q))
   '(((var z) var z)))
 
-(run* (q) (walko '(var z) '(((var z) . cat)) q))
+(test "walko 1"
+  (run* (q) (walko '(var z) '(((var z) . cat)) q))
+  '(cat))
 
-(run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
+(test "walko 2"
+  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
+  '(cat))
 
-(run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
+(test "walko 3"
+  (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
+  '((var (s (s (s z))))))
+
 
 
 (test "walk*o the vars"
   (run* (q) (walk*o '((var z) . (var z)) '(((var z) . cat)) q))
   '((cat . cat)))
+
+
+
+(test "unifyo 1"
+  (run 1 (subst^)
+    (unifyo 'cat 'cat '() subst^))
+  '(()))
