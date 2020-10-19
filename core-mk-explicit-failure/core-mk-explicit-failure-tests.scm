@@ -1,6 +1,14 @@
 (load "core-mk-explicit-failure.scm")
 (load "../faster-miniKanren/test-check.scm")
 
+(test "mko-0"
+  (run* (q)
+    (mko `(run 1 (x)
+            (fresh (y)
+              (== (cons y y) x)))
+         q))
+  '((((var (s z)) . (var (s z))))))
+
 (test "mko-1"
   (run* (q) (mko '(run 1 (x)
                     (== x 'cat))
@@ -26,6 +34,48 @@
             (== ,e x))
          '(cat)))
   '('cat))
+
+(test "mko occur check violation-1"
+  (run* (q)
+    (mko `(run 1 (x)
+            (== (cons x x) x))
+         q))
+  '(()))
+
+(test "mko occur check violation-2"
+  (run* (q)
+    (mko `(run 1 (x)
+            (== (cons x x) x))
+         '()))
+  '(_.0))
+
+(test "mko fail backwards-0"
+  (run 1 (e)
+    (mko `(run 1 (x)
+            (== (cons ,e ,e) x))
+         '()))
+  '(x))
+
+(test "mko fail backwards-1"
+  (run 8 (e)
+    (mko `(run 1 (x)
+            (== ,e x))
+         '()))
+  '(((cons '_.0 x) (=/= ((_.0 var))) (sym _.0))
+    (cons '() x)
+    ((cons '(_.0 . _.1) x)
+     (=/= ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))
+    ((cons '(_.0) x)
+     (=/= ((_.0 var))) (sym _.0))
+    ((cons '(() . _.0) x)
+     (=/= ((_.0 var))) (sym _.0))
+    (cons '(()) x)
+    ((cons x '_.0) ;; a nice theorem!
+     (absento (var _.0)))
+    ((cons '(_.0 _.1 . _.2) x)
+     (=/= ((_.0 var)) ((_.1 var)) ((_.2 var)))
+     (sym _.0 _.1 _.2))))
 
 (test "mko-2"
   (run* (q) (mko '(run 1 (x)
@@ -146,11 +196,11 @@
 
 (test "mko occur-check-1"
   (run* (q) (mko '(run 1 (x) (== (cons x x) x)) q))
-  '())
+  '(()))
 
 (test "mko occur-check-2"
   (run* (q) (mko '(run 1 (x) (== x (cons x x))) q))
-  '())
+  '(()))
 
 (test "mko occur-check-3"
   (run* (q)
@@ -159,7 +209,7 @@
               (== (cons y y) x)
               (== x y)))
          q))
-  '())
+  '(()))
 
 (test "mko occur-check-4"
   (run* (q)
@@ -168,14 +218,12 @@
               (== x y)
               (== (cons y y) x)))
          q))
-  '())
+  '(()))
 
 (test "mko backwards-1"
   (run 10 (e) (mko e '(cat)))
   '(((run 1 (_.0) (== 'cat _.0))
-     (sym _.0))
-    ((run 1 (_.0) (== _.0 'cat))
-     (sym _.0))
+     (sym _.0)) ((run 1 (_.0) (== _.0 'cat)) (sym _.0))
     ((run 1 (_.0)
        (conde
          ((== 'cat _.0))
@@ -198,27 +246,27 @@
      (sym _.0))
     ((run 1 (_.0)
        (fresh (_.1)
-         (== 'cat _.0)))
-     (=/= ((_.0 _.1)))
-     (sym _.0 _.1))
-    ((run 1 (_.0)
-       (fresh (_.1)
          (== '_.2 '_.2)
          (fresh (_.3)
            (== 'cat _.3))))
      (=/= ((_.2 var)))
      (sym _.0 _.1 _.2 _.3))
     ((run 1 (_.0)
-       (== '(_.1 . cat) (cons '_.1 _.0)))
-     (=/= ((_.1 var)))
-     (sym _.0 _.1))
+       (fresh (_.1)
+         (fresh (_.2) (== '_.3 '_.3))
+         (fresh (_.4) (== 'cat _.4))))
+     (=/= ((_.3 var)))
+     (sym _.0 _.1 _.2 _.3 _.4))
     ((run 1 (_.0)
        (fresh (_.1)
          (== '_.2 '_.2)
-         (fresh (_.3)
-           (== _.3 'cat))))
+         (fresh (_.3) (== _.3 'cat))))
      (=/= ((_.2 var)))
-     (sym _.0 _.1 _.2 _.3))))
+     (sym _.0 _.1 _.2 _.3))
+    ((run 1 (_.0)
+       (fresh (_.1) (== 'cat _.0)))
+     (=/= ((_.0 _.1)))
+     (sym _.0 _.1))))
 
 (test "mko backwards-2"
   (run 1 (e)
@@ -241,9 +289,9 @@
   (run 1 (expr subst^)
     (fresh (c)
       (eval-mko expr '() 'z c '() subst^)))
-  '((((== '_.0 '_.0) ())
-     (=/= ((_.0 var))) (sym _.0))))
-
+  '((((== (quote _.0) (quote _.1)) #f)
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))))
 
 (test "eval-mko 2"
   (run* (subst^)
@@ -364,11 +412,6 @@
      (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((fresh (_.0)
-       (== 'dog _.0)
-       (== '_.1 '_.1))
-     (=/= ((_.1 var)))
-     (sym _.0 _.1))
-    ((fresh (_.0)
        (fresh (_.1)
          (== '_.2 '_.2))
        (== 'dog _.0))
@@ -376,10 +419,9 @@
      (sym _.0 _.1 _.2))
     ((fresh (_.0)
        (fresh (_.1)
-         (== '_.2 '_.2))
-       (== _.0 'dog))
-     (=/= ((_.2 var)))
-     (sym _.0 _.1 _.2))
+         (== 'dog _.0)))
+     (=/= ((_.0 _.1)))
+     (sym _.0 _.1))
     ((fresh (_.0)
        (conde
          ((== 'dog _.0))
@@ -392,10 +434,13 @@
      (sym _.0))
     ((conde
        (_.0)
-       ((fresh (_.1)
-          (== 'dog _.1))))
-     (sym _.1))))
-
+       ((fresh (_.1) (== 'dog _.1))))
+     (sym _.1))
+    ((fresh (_.0)
+       (conde
+         (_.1)
+         ((== 'dog _.0))))
+     (sym _.0))))
 
 
 (test "walko the dog"
@@ -448,4 +493,24 @@
 (test "unifyo 4"
   (run* (subst^)
     (unifyo '(var z) '((var z)) '() subst^))
+  '(#f))
+
+(test "unifyo 5"
+  (run* (subst^)
+    (unifyo '(var z) '(var z) '() subst^))
+  '(()))
+
+(test "unifyo 6"
+  (run* (subst^)
+    (unifyo '(var z) '(var (s z)) '() subst^))
+  '((((var z) . (var (s z))))))
+
+(test "unifyo 7"
+  (run* (subst^)
+    (unifyo '(var z) '((var z)) '() subst^))
+  '(#f))
+
+(test "unifyo 8"
+  (run* (subst^)
+    (unifyo '((var z)) '(var z) '() subst^))
   '(#f))

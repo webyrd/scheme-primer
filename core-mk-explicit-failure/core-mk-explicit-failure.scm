@@ -70,14 +70,17 @@ run1-expr ::= (run 1 (<x>) <ge>)
 
 (define mko
   (lambda (expr out)
-    (fresh (q ge count^ subst^ t)
+    (fresh (q ge count^ s)
       (== `(run 1 (,q) ,ge) expr)
       (symbolo q)
+      (eval-mko ge `((,q . (var z))) `(s z) count^ '() s)
+      ;; this goal ordering is unfortunate!
       (conde
-        ((== #f t) (== '() out))
-        ((=/= #f t) (== (list t) out)))
-      (eval-mko ge `((,q . (var z))) `(s z) count^ '() subst^)
-      (walk*o `(var z) subst^ t))))
+        ((== #f s) (== '() out))
+        ((=/= #f s)
+         (fresh (t)
+           (== (list t) out)
+           (walk*o `(var z) s t)))))))
 
 (define eval-mko
   (lambda (expr env count count^ subst subst^)
@@ -86,10 +89,10 @@ run1-expr ::= (run 1 (<x>) <ge>)
          (== `(== ,e1 ,e2) expr)
          (evalo e1 env t1)
          (evalo e2 env t2)
-         (unifyo t1 t2 subst s)
          (conde
            ((== #f s) (== #f subst^))
-           ((=/= #f s) (== s subst^)))))
+           ((=/= #f s) (== s subst^)))
+         (unifyo t1 t2 subst s)))
       ((fresh (x ge subst^^)
          (== `(fresh (,x) ,ge) expr)
          (symbolo x)
