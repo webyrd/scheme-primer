@@ -4,6 +4,10 @@
 ;; TODO:
 ;;
 ;; make reification work like in regular my by using some kind of fake subst
+;; =>
+;; hmmm--how would you be able to tell whether '_.0' came from
+;; miniKanren, or the language being interpreted?
+;;
 ;;
 ;; add occur check
 ;;
@@ -247,3 +251,5 @@
 (run* (q) (mko '(run* (x) (== x 'cat)) q))
 
 (run* (q) (mko '(run* (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
+
+(run* (q) (mko '(run* (x) (== 'cat 'cat)) q))
