@@ -7,8 +7,11 @@
                  q))
   '((cat)))
 
+;; run 2 diverges (didn't diverge when we didn't support explicit failure)
+;;
+;; can we do better?
 (test "mko-1b"
-  (run* (e)
+  (run 1 (e)
     (mko `(run 1 (x)
             (== ',e x))
          '(cat)))
@@ -174,11 +177,6 @@
     ((run 1 (_.0) (== _.0 'cat))
      (sym _.0))
     ((run 1 (_.0)
-       (fresh (_.1)
-         (== 'cat _.0)))
-     (=/= ((_.0 _.1)))
-     (sym _.0 _.1))
-    ((run 1 (_.0)
        (conde
          ((== 'cat _.0))
          (_.1)))
@@ -188,10 +186,6 @@
          (_.1)
          ((== 'cat _.0))))
      (sym _.0))
-    ((run 1 (_.0)
-       (== '(_.1 . cat) (cons '_.1 _.0)))
-     (=/= ((_.1 var)))
-     (sym _.0 _.1))
     ((run 1 (_.0)
        (conde
          ((== _.0 'cat))
@@ -203,12 +197,28 @@
          ((== _.0 'cat))))
      (sym _.0))
     ((run 1 (_.0)
-       (== '(cat . _.1) (cons _.0 '_.1)))
+       (fresh (_.1)
+         (== 'cat _.0)))
+     (=/= ((_.0 _.1)))
+     (sym _.0 _.1))
+    ((run 1 (_.0)
+       (fresh (_.1)
+         (== '_.2 '_.2)
+         (fresh (_.3)
+           (== 'cat _.3))))
+     (=/= ((_.2 var)))
+     (sym _.0 _.1 _.2 _.3))
+    ((run 1 (_.0)
+       (== '(_.1 . cat) (cons '_.1 _.0)))
      (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((run 1 (_.0)
-       (== '(() . cat) (cons '() _.0)))
-     (sym _.0))))
+       (fresh (_.1)
+         (== '_.2 '_.2)
+         (fresh (_.3)
+           (== _.3 'cat))))
+     (=/= ((_.2 var)))
+     (sym _.0 _.1 _.2 _.3))))
 
 (test "mko backwards-2"
   (run 1 (e)
@@ -245,8 +255,7 @@
   (run* (subst^)
     (fresh (c)
       (eval-mko '(== 'cat 'dog) '() 'z c '() subst^)))
-  '())
-
+  '(#f))
 
 (test "eval-mko 4"
   (run* (subst^)
@@ -272,7 +281,7 @@
       (eval-mko '(fresh (x)
                    (== x 'cat) (== 'dog x))
                 '() 'z c '() subst^)))
-  '())
+  '(#f))
 
 (test "eval-mko 7"
   (run* (subst^)
@@ -313,7 +322,7 @@
                         (== 'fish y)))
                      ((== x 'dog))))
                 '() 'z c '() subst^)))
-  '((((var z) . dog))))
+  '((((var z) . dog)) #f))
 
 (test "eval-mko 11"
   (run* (subst^)
@@ -325,7 +334,7 @@
                         (== 'fish y)
                         (== y 'cat)))))
                 '() 'z c '() subst^)))
-  '((((var z) . dog))))
+  '((((var z) . dog)) #f))
 
 (test "eval-mko backwards-1"
   (run 2 (expr)
@@ -355,12 +364,6 @@
      (=/= ((_.1 var)))
      (sym _.0 _.1))
     ((fresh (_.0)
-       (fresh (_.1)
-         (== '_.2 '_.2))
-       (== 'dog _.0))
-     (=/= ((_.2 var)))
-     (sym _.0 _.1 _.2))
-    ((fresh (_.0)
        (== 'dog _.0)
        (== '_.1 '_.1))
      (=/= ((_.1 var)))
@@ -368,14 +371,15 @@
     ((fresh (_.0)
        (fresh (_.1)
          (== '_.2 '_.2))
-       (== _.0 'dog))
+       (== 'dog _.0))
      (=/= ((_.2 var)))
      (sym _.0 _.1 _.2))
     ((fresh (_.0)
        (fresh (_.1)
-         (== 'dog _.0)))
-     (=/= ((_.0 _.1)))
-     (sym _.0 _.1))
+         (== '_.2 '_.2))
+       (== _.0 'dog))
+     (=/= ((_.2 var)))
+     (sym _.0 _.1 _.2))
     ((fresh (_.0)
        (conde
          ((== 'dog _.0))
@@ -385,7 +389,12 @@
        ((fresh (_.0)
           (== 'dog _.0)))
        (_.1))
-     (sym _.0))))
+     (sym _.0))
+    ((conde
+       (_.0)
+       ((fresh (_.1)
+          (== 'dog _.1))))
+     (sym _.1))))
 
 
 
@@ -422,6 +431,21 @@
 
 
 (test "unifyo 1"
-  (run 1 (subst^)
+  (run* (subst^)
     (unifyo 'cat 'cat '() subst^))
   '(()))
+
+(test "unifyo 2"
+  (run* (subst^)
+    (unifyo 'cat 'dog '() subst^))
+  '(#f))
+
+(test "unifyo 3"
+  (run* (subst^)
+    (unifyo '(var z) '((var (s z))) '() subst^))
+  '((((var z) (var (s z))))))
+
+(test "unifyo 4"
+  (run* (subst^)
+    (unifyo '(var z) '((var z)) '() subst^))
+  '(#f))

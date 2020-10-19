@@ -73,27 +73,35 @@ run1-expr ::= (run 1 (<x>) <ge>)
     (fresh (q ge count^ subst^ t)
       (== `(run 1 (,q) ,ge) expr)
       (symbolo q)
-      (== (list t) out)
+      (conde
+        ((== #f t) (== '() out))
+        ((=/= #f t) (== (list t) out)))
       (eval-mko ge `((,q . (var z))) `(s z) count^ '() subst^)
       (walk*o `(var z) subst^ t))))
 
 (define eval-mko
   (lambda (expr env count count^ subst subst^)
     (conde
-      ((fresh (e1 e2 t1 t2)
+      ((fresh (e1 e2 t1 t2 s)
          (== `(== ,e1 ,e2) expr)
          (evalo e1 env t1)
          (evalo e2 env t2)
-         (unifyo t1 t2 subst subst^)))
+         (unifyo t1 t2 subst s)
+         (conde
+           ((== #f s) (== #f subst^))
+           ((=/= #f s) (== s subst^)))))
       ((fresh (x ge subst^^)
          (== `(fresh (,x) ,ge) expr)
          (symbolo x)
          (eval-mko ge `((,x . (var ,count)) . ,env) `(s ,count) count^ subst subst^)))
-      ((fresh (x ge1 ge2 count^^ subst^^)
+      ((fresh (x ge1 ge2 count^^ s)
          (== `(fresh (,x) ,ge1 ,ge2) expr)
          (symbolo x)
-         (eval-mko ge1 `((,x . (var ,count)) . ,env) `(s ,count) count^^ subst subst^^)
-         (eval-mko ge2 `((,x . (var ,count)) . ,env) count^^ count^ subst^^ subst^)))
+         (eval-mko ge1 `((,x . (var ,count)) . ,env) `(s ,count) count^^ subst s)
+         (conde
+           ((== #f s) (== #f subst^))
+           ((=/= #f s)
+            (eval-mko ge2 `((,x . (var ,count)) . ,env) count^^ count^ s subst^)))))
       ((fresh (ge1 ge2)
          (== `(conde (,ge1) (,ge2)) expr)
          (conde
@@ -127,14 +135,29 @@ run1-expr ::= (run 1 (<x>) <ge>)
       (walko t1 subst t1^)
       (walko t2 subst t2^)
       (conde
-        ((symbolo t1^) (symbolo t2^) (== t1^ t2^) (== subst subst^))
-        ((== '() t1^) (== '() t2^) (== subst subst^))
-        ((fresh (c1 c2)
-           (== `(var ,c1) t1^)
-           (== `(var ,c2) t2^)
-           (conde
-             ((== c1 c2) (== subst subst^))
-             ((=/= c1 c2) (== `(((var ,c1) . (var ,c2)) . ,subst) subst^)))))
+        ;; ----- symbols -------
+        ;; symbol with symbol
+        ((symbolo t1^) (symbolo t2^)
+         (conde
+           ((== t1^ t2^) (== subst subst^))
+           ((=/= t1^ t2^) (== #f subst^))))
+        ;; symbol with empty list
+        ((symbolo t1^) (== '() t2^)
+         (== #f subst^))
+        ((symbolo t2^) (== '() t1^)
+         (== #f subst^))
+        ;; symbol with pair
+        ((fresh (a2 d2)
+           (symbolo t1^)
+           (== `(,a2 . ,d2) t2^)
+           (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
+           (== #f subst^)))
+        ((fresh (a1 d1)
+           (symbolo t2^)
+           (== `(,a1 . ,d1) t1^)
+           (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
+           (== #f subst^)))
+        ;; symbol with var
         ((fresh (c1)
            (== `(var ,c1) t1^)
            (symbolo t2^) ;; t2^ is a literal symbol, not a var
@@ -143,6 +166,22 @@ run1-expr ::= (run 1 (<x>) <ge>)
            (== `(var ,c2) t2^)
            (symbolo t1^) ;; t1^ is a literal symbol, not a var
            (== `(((var ,c2) . ,t1^) . ,subst) subst^)))
+        ;; ----- empty list -------
+        ;; empty list with empty list
+        ((== '() t1^) (== '() t2^) (== subst subst^))
+        ;; empty list with symbol -- handled above
+        ;; empty list with pair
+        ((fresh (a2 d2)
+           (== '() t1^)
+           (== `(,a2 . ,d2) t2^)
+           (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
+           (== #f subst^)))
+        ((fresh (a1 d1)
+           (== '() t2^)
+           (== `(,a1 . ,d1) t1^)
+           (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
+           (== #f subst^)))        
+        ;; empty list with var
         ((fresh (c1)
            (== `(var ,c1) t1^)
            (== '() t2^)
@@ -151,27 +190,82 @@ run1-expr ::= (run 1 (<x>) <ge>)
            (== `(var ,c2) t2^)
            (== '() t1^)
            (== `(((var ,c2) . ,t1^) . ,subst) subst^)))
+        ;; ----- var -------
+        ;; var and var
+        ((fresh (c1 c2)
+           (== `(var ,c1) t1^)
+           (== `(var ,c2) t2^)
+           (conde
+             ((== c1 c2) (== subst subst^))
+             ((=/= c1 c2) (== `(((var ,c1) . (var ,c2)) . ,subst) subst^)))))
+        ;; var with symbol -- handled above
+        ;; var with empty list -- handled above
+        ;; var with pair       
         ((fresh (c1 a2 d2)
            (== `(var ,c1) t1^)
            (== `(,a2 . ,d2) t2^)
            (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,c1) . (,a2 . ,d2)) . ,subst) subst^)
-           (absento t1^ t2^) ;; use absento to implement the occurs check
-           ))
+           (conde
+             ((== `(((var ,c1) . (,a2 . ,d2)) . ,subst) subst^)
+              (not-occurso t1^ t2^))
+             ((== #f subst^)
+              (occurso t1^ t2^)))))
         ((fresh (c2 a1 d1)
            (== `(var ,c2) t2^)
            (== `(,a1 . ,d1) t1^)
            (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
-           (== `(((var ,c2) . (,a1 . ,d1)) . ,subst) subst^)
-           (absento t2^ t1^) ;; use absento to implement the occurs check
-           ))
+           (conde
+             ((== `(((var ,c2) . (,a1 . ,d1)) . ,subst) subst^)
+              (not-occurso t2^ t1^))
+             ((== #f subst^)
+              (occurso t2^ t1^)))))
+        ;; ----- pair -------
+        ;; pair with pair
         ((fresh (a1 d1 a2 d2 subst^^)
            (== `(,a1 . ,d1) t1^)
            (== `(,a2 . ,d2) t2^)
            (=/= 'var a1) ;; don't mistake tagged vars for regular pairs
            (=/= 'var a2) ;; don't mistake tagged vars for regular pairs
-           (unifyo a1 a2 subst subst^^)
-           (unifyo d1 d2 subst^^ subst^)))))))
+           (unifyo a1 a2 subst subst^^)           
+           (conde
+             ((== #f subst^^)
+              (== #f subst^))
+             ((=/= #f subst^^)
+              (unifyo d1 d2 subst^^ subst^)))))
+        ;; pair with symbol -- handled above
+        ;; pair with empty list -- handled above
+        ;; pair with var -- handled above
+        ))))
+
+(define occurso
+  (lambda (x t)
+    (fresh (c)
+      (== `(var ,c) x)
+      (conde
+        ((== `(var ,c) t))
+        ((fresh (a d)
+           (== `(,a . ,d) t)
+           (=/= 'var a) ;; don't mistake tagged vars for regular pairs
+           (conde
+             ((occurso x a))
+             ((not-occurso x a)
+              (occurso x d)))))))))
+
+(define not-occurso
+  (lambda (x t)
+    (fresh (c)
+      (== `(var ,c) x)
+      (conde
+        ((symbolo t))
+        ((== '() t))
+        ((fresh (c^)
+           (== `(var ,c^) t)
+           (=/= c c^)))
+        ((fresh (a d)
+           (== `(,a . ,d) t)
+           (=/= 'var a) ;; don't mistake tagged vars for regular pairs
+           (not-occurso x a)
+           (not-occurso x d)))))))
 
 (define walko
   (lambda (t subst t^)
