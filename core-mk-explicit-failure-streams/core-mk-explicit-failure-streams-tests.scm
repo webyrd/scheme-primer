@@ -431,6 +431,10 @@
 ;; stopped here -- fix up the rest of the tests, below
 
 ;; why is this so slow?
+;;
+;; because the evaluator is currently very generate & test
+;;
+;; probably needs the Barliman/n-grams/deep learning help
 (test "mko backwards-2c"
   (run 1 (e1 e2 e3 e4)
     (mko `(run* (q)
