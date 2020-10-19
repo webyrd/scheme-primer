@@ -317,7 +317,6 @@
      (sym _.0 _.1 _.2))))
 
 (test "mko-simple and mko-complex combined tests 1h"
-  ;; no membero needed!
   (run 5 (e)
     (fresh (simple-expr complex-expr l e1 e2 e3)
       (== `(run 1 (x) ,e) simple-expr)
