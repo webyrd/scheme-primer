@@ -144,13 +144,28 @@
            (walk*o a subst a^)
            (walk*o d subst d^)))))))
 
-(run* (q) (walko 'dog '(((var z) . cat)) q))
+(test "walko the dog"
+  (run* (q) (walko 'dog '(((var z) . cat)) q))
+  '(dog))
+
+(test "walko the dogs"
+  (run* (q) (walko '(dog . dog) '(((var z) . cat)) q))
+  '((dog . dog)))
+
+(test "walko the vars"
+  (run* (q) (walko '((var z) . (var z)) '(((var z) . cat)) q))
+  '(((var z) var z)))
 
 (run* (q) (walko '(var z) '(((var z) . cat)) q))
 
 (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s (s z)))) . cat)) q))
 
 (run* (q) (walko '(var (s (s (s z)))) '(((var (s (s z))) . cat)) q))
+
+
+(test "walk*o the vars"
+  (run* (q) (walk*o '((var z) . (var z)) '(((var z) . cat)) q))
+  '((cat . cat)))
 
 
 (run 1 (expr subst^)
