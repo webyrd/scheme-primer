@@ -114,7 +114,7 @@
                       ((== x 'cat))
                       ((== 'dog x))))
                  q))
-  '((cat) (dog)))
+  '((cat dog)))
 
 (test "mko-3"
   (run* (q) (mko '(run* (x)
