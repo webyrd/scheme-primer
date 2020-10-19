@@ -25,19 +25,24 @@
 #|
 Grammar:
 
+;; run 1 expression
 run1-expr ::= (run 1 (<x>) <ge>)
 
+;; goal expression
 <ge> ::= (== <e> <e>) |
          (fresh (<x>) <ge>) |
          (fresh (<x>) <ge> <ge>) |
          (conde (<ge>) (<ge>))
 
+;; Scheme expression
 <e> ::= <x> |
         (quote <datum>) |
         (cons <e> <e>)
 
+;; Scheme lexical variable
 <x> ::= <symbol>
 
+;; quoted datum
 <datum> ::= <symbol> |
             () |
             (<datum> . <datum>)
@@ -62,10 +67,10 @@ run1-expr ::= (run 1 (<x>) <ge>)
 
 (define mko
   (lambda (expr out)
-    (fresh (q e count^ subst^)
-      (== `(run 1 (,q) ,e) expr)
+    (fresh (q ge count^ subst^)
+      (== `(run 1 (,q) ,ge) expr)
       (symbolo q)
-      (eval-mko e `((,q . (var z))) `(s z) count^ '() subst^)
+      (eval-mko ge `((,q . (var z))) `(s z) count^ '() subst^)
       (walk*o `(var z) subst^ out))))
 
 (define eval-mko
@@ -76,20 +81,20 @@ run1-expr ::= (run 1 (<x>) <ge>)
          (evalo e1 env t1)
          (evalo e2 env t2)
          (unifyo t1 t2 subst subst^)))
-      ((fresh (x e subst^^)
-         (== `(fresh (,x) ,e) expr)
+      ((fresh (x ge subst^^)
+         (== `(fresh (,x) ,ge) expr)
          (symbolo x)
-         (eval-mko e `((,x . (var ,count)) . ,env) `(s ,count) count^ subst subst^)))
-      ((fresh (x e1 e2 count^^ subst^^)
-         (== `(fresh (,x) ,e1 ,e2) expr)
+         (eval-mko ge `((,x . (var ,count)) . ,env) `(s ,count) count^ subst subst^)))
+      ((fresh (x ge1 ge2 count^^ subst^^)
+         (== `(fresh (,x) ,ge1 ,ge2) expr)
          (symbolo x)
-         (eval-mko e1 `((,x . (var ,count)) . ,env) `(s ,count) count^^ subst subst^^)
-         (eval-mko e2 `((,x . (var ,count)) . ,env) count^^ count^ subst^^ subst^)))
-      ((fresh (e1 e2)
-         (== `(conde (,e1) (,e2)) expr)
+         (eval-mko ge1 `((,x . (var ,count)) . ,env) `(s ,count) count^^ subst subst^^)
+         (eval-mko ge2 `((,x . (var ,count)) . ,env) count^^ count^ subst^^ subst^)))
+      ((fresh (ge1 ge2)
+         (== `(conde (,ge1) (,ge2)) expr)
          (conde
-           ((eval-mko e1 env count count^ subst subst^))
-           ((eval-mko e2 env count count^ subst subst^))))))))
+           ((eval-mko ge1 env count count^ subst subst^))
+           ((eval-mko ge2 env count count^ subst subst^))))))))
 
 (define evalo
   (lambda (expr env val)
