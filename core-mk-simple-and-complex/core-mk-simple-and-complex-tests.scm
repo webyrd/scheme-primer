@@ -132,18 +132,42 @@
 
 
 ;; combined mko-simple and mko-complex closed tests
-(time
- (test "mko-simple and mko-complex combined tests 1"
-   (run 1 (e)
-     (fresh (simple-expr complex-expr)
-       (== `(run 1 (x) ,e) simple-expr)
-       (== `(run* (x) ,e) complex-expr)
-       (mko-simple simple-expr 'cat)
-       (mko-simple simple-expr 'dog)
-       (mko-complex complex-expr '(cat dog))))
-   '((conde
-       ((== 'cat x))
-       ((== 'dog x))))))
+(test "mko-simple and mko-complex combined tests 1a"
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (mko-complex complex-expr '(cat dog))))
+  '((conde
+      ((== 'cat x))
+      ((== 'dog x)))))
+
+;; thanks for the test, Nada!
+(test "mko-simple and mko-complex combined tests 1b"
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'dog)
+      (mko-simple simple-expr 'cat)
+      (mko-complex complex-expr '(cat dog))))
+  '((conde
+      ((== 'cat x))
+      ((== 'dog x)))))
+
+(test "mko-simple and mko-complex combined tests 1c"
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (mko-complex complex-expr '(dog cat))))
+  '((conde
+      ((== 'dog x))
+      ((== 'cat x)))))
 
 (test "mko-simple and mko-complex combined tests 2"
   (run 1 (e)
@@ -198,37 +222,58 @@
           ((== 'fish 'bat)))))))
 
 (test "mko-simple and mko-complex combined tests 5"
-  (time
-   (run 1 (e)
-     (fresh (simple-expr complex-expr)
-       (== `(run 1 (x) ,e) simple-expr)
-       (== `(run* (x) ,e) complex-expr)
-       (mko-simple simple-expr 'cat)
-       (mko-simple simple-expr 'dog)
-       (mko-simple simple-expr 'fish)
-       (mko-complex complex-expr '(cat dog fish)))))
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (mko-simple simple-expr 'fish)
+      (mko-complex complex-expr '(cat dog fish))))
   '((conde
       ((== 'cat x))
       ((conde
          ((== 'dog x))
          ((== 'fish x)))))))
 
-(test "mko-simple and mko-complex combined tests 6"
-  (time
-   (run 1 (e)
-     (fresh (simple-expr complex-expr)
-       (== `(run 1 (x) ,e) simple-expr)
-       (== `(run* (x) ,e) complex-expr)
-       (fresh (e^)
-         (== `(conde
-                ((== 'cat x))
-                ((conde
-                   ((== 'dog x))
-                   (,e^))))
-             e))
-       (mko-simple simple-expr 'cat)
-       (mko-simple simple-expr 'dog)
-       (mko-complex complex-expr '(cat dog)))))
+(test "mko-simple and mko-complex combined tests 6a"
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (fresh (e^)
+        (== `(conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  (,e^))))
+            e))
+      (mko-simple simple-expr 'cat)
+      (mko-simple simple-expr 'dog)
+      (mko-complex complex-expr '(cat dog))))
+  '(((conde
+       ((== 'cat x))
+       ((conde
+          ((== 'dog x))
+          ((== '_.0 '_.1)))))
+     (=/= ((_.0 _.1)) ((_.0 var)) ((_.1 var)))
+     (sym _.0 _.1))))
+
+(test "mko-simple and mko-complex combined tests 6b"
+  (run 1 (e)
+    (fresh (simple-expr complex-expr)
+      (== `(run 1 (x) ,e) simple-expr)
+      (== `(run* (x) ,e) complex-expr)
+      (fresh (e^)
+        (== `(conde
+               ((== 'cat x))
+               ((conde
+                  ((== 'dog x))
+                  (,e^))))
+            e))
+      (mko-simple simple-expr 'dog)
+      (mko-simple simple-expr 'cat)
+      (mko-complex complex-expr '(cat dog))))
   '(((conde
        ((== 'cat x))
        ((conde
