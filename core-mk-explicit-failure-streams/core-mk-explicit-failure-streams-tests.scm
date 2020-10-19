@@ -176,14 +176,6 @@
   '((cat)))
 
 ;; broken
-(test "mko-8d"
-  (run* (q) (mko '(run* (x)
-                    (fresh (y)
-                      (== x y)
-                      (== y 'cat)))
-                 q))
-  '((cat)))
-
 (test "mko-9"
   (run* (q) (mko '(run* (x)
                     (fresh (y)
