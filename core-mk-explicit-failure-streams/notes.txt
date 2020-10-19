@@ -17,4 +17,7 @@ See the "mko forwards unclosed" tests in core-mk-tests.scm to see how the expres
 
 Check that this does indeed work...
 
+*this does appear to work--see the tests in `core-mk-simple-and-complex`*  We combine two *very* different relational mk interpreters to combine speed with expressiveness.
+
+
 Can we play similar tricks with multiple versions of Scheme interpreters, and/or type-inferencers?
