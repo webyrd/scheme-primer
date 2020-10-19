@@ -150,11 +150,37 @@
                  q))
   '(((var z))))
 
-(test "mko-8"
+(test "mko-8a"
+  (run* (q) (mko '(run* (x)
+                    (fresh (y)
+                      (== 'a 'a)
+                      (== 'a 'a)))
+                 q))
+  '(((var z))))
+
+(test "mko-8b"
+  (run* (q) (mko '(run* (x)
+                    (fresh (y)
+                      (== 'a 'a)
+                      (== x 'cat)))
+                 q))
+  '((cat)))
+
+;; broken
+(test "mko-8c"
   (run* (q) (mko '(run* (x)
                     (fresh (y)
                       (== y 'cat)
                       (== x y)))
+                 q))
+  '((cat)))
+
+;; broken
+(test "mko-8d"
+  (run* (q) (mko '(run* (x)
+                    (fresh (y)
+                      (== x y)
+                      (== y 'cat)))
                  q))
   '((cat)))
 
