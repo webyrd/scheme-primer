@@ -1,6 +1,21 @@
 (load "../faster-miniKanren/mk-vicare.scm")
 (load "../faster-miniKanren/mk.scm")
 
+;; TODO:
+;;
+;; fix variables by adding a counter to make them unique
+;; add occur check
+;; support =/=, symbolo, numbero, and absento
+;; support helpers and recursion
+
+(define mko
+  (lambda (expr out)
+    (fresh (q e subst^)
+      (== `(run* (,q) ,e) expr)
+      (symbolo q)
+      (eval-mko e `((,q . (var ,q))) '() subst^)
+      (walk*o `(var ,q) subst^ out))))
+
 (define eval-mko
   (lambda (expr env subst subst^)
     (conde
@@ -110,7 +125,22 @@
            (symbolo x)
            (walk-varo t subst t^)))))))
 
-;; TODO add occur check
+(define walk*o
+  (lambda (t subst t^)
+    (fresh (t^^)
+      (walko t subst t^^)
+      (conde
+        ((symbolo t^^) (== t^^ t^))
+        ((fresh (x)
+           (== `(var ,x) t^^)
+           (symbolo x)
+           (== t^^ t^)))
+        ((fresh (a d a^ d^)
+           (== `(,a . ,d) t^^)
+           (=/= 'var a) ;; don't mistake tagged vars for regular pairs
+           (== `(,a^ . ,d^) t^)
+           (walk*o a subst a^)
+           (walk*o d subst d^)))))))
 
 (run* (q) (walko 'dog '(((var x) . cat)) q))
 
@@ -176,3 +206,8 @@
   (=/= ((_.0 var)))
   (sym _.0)))
 |#
+
+(run* (q) (mko '(run* (x) (== x 'cat)) q))
+
+(run* (q) (mko '(run* (x) (conde ((== x 'cat)) ((== 'dog x)))) q))
+
