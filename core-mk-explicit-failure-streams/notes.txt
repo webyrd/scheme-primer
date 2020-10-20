@@ -1,3 +1,24 @@
+I implemented 3 interps on Sunday night (18 October 02020), with varying levels of metacircularity.
+
+The most complex one (in this directory) is microKanren-ish: it uses bind and mplus, but currently doesn't support inc.
+The complex version implements run* semantics, and associates an expression with a list of values.
+
+The simplest interpreter is much more metacircular--it implements conde using conde, for example.
+
+I use tagged peano numerals to represent logic variables in all three versions and use explicit environments and substitutions
+
+The simplest interpreter only can express successful unification--it uses absento to implement the occurs check.
+
+The most complicated version can express unification succeeding or failing, and the occur check succeeding or failing.
+
+The simple version implements a non-deterministic run 1 semantics. That is, it associates an expression with *one* value that might be produced from a run 1, were conde to be non-deterministic.  This version can express that the miniKanren expression must produce an answer, but can't express that no other answers may be returned.
+
+I think we've played around with this sort of interpreter before.
+
+The most interesting part, to me, is that the microKanreny implementation is expressive but slow, while the simple version is fast but not as expressive.  However, we can write a query that uses both interpreters on the same miniKanren expression, combining speed with expressiveness. This seems to work well in my simple examples. I haven't added support for recursive functions yet. That's when it will become more interesting.
+
+---------------
+
 How can we make synthesis of miniKanren expressions much faster?
 
 An idea! We shoul be able to combine the `mko` relations from `core-mk.scm`, `core-mk-explicit-failure`, and `core-mk-explicit-failure-streams.scm`.  This should let us combine efficiency with expressiveness.
