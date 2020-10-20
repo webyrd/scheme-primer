@@ -20,8 +20,28 @@ Check that this does indeed work...
 *this does appear to work--see the tests in `core-mk-simple-and-complex`*  We combine two *very* different relational mk interpreters to combine speed with expressiveness.
 
 
+Compare this version with Michael Ballantyne's:
+
+https://github.com/michaelballantyne/meta-minikanren/blob/master/mk-in-mk.scm
+
+MB's version includes explicit incs, which this implementation does not.  There are other differences as well.  How well does it do in synthesizing code from the desired behavior?  Does it implement run* semantics?  Or can you specify run n?
+
+Compare also to implementing microKanren in Scheme in the Barliman interpreter.
+
+
+
 Try synthesizing the Judea Pearl Rifleman causal inference examples, using the code from Nada and Jeremy.
 
+Try playing with declarative `findall`, like in Prolog.
 
+Should run return a set rather than a list?  Or a bag, perhaps?
+
+Try implementing run n in addition to run*.
+
+Once we support recursive relations, run* may diverge.  In this case, the run 1 semantics of the simpler, more meta-circular mko may be especially useful.  Perhaps we really need to return a stream rather than a list.  Can we use co-inductive logic programming?
+
+Seems like this implementation, and probably MB's, makes it work revisiting tabling for abstract interpretation, since we can get access to the entire list/set/bag of answers at once.
+
+Try adding inc.
 
 Can we play similar tricks with multiple versions of Scheme interpreters, and/or type-inferencers?
