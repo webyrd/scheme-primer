@@ -1,5 +1,5 @@
 (load "core-mk-explicit-unification.scm")
-(load "../faster-miniKanren/test-check.scm")
+(load "../../faster-miniKanren/test-check.scm")
 
 (test "mko-1"
   (run* (q) (mko '(run 1 (x)
