@@ -1,4 +1,4 @@
-(load "core-mk-explicit-failure-streams.scm")
+(load "core-mk-explicit-unification-failure-streams.scm")
 (load "../faster-miniKanren/test-check.scm")
 
 
