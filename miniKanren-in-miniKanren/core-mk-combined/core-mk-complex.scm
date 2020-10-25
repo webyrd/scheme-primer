@@ -1,3 +1,5 @@
+;;; Code from `core-mk-explicit-unification-failure-streams`
+
 ;; Relational environment-passing, substitution-passing interpreter
 ;; for a subset of miniKanren, written in miniKanren.
 ;;
