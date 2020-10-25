@@ -1,4 +1,4 @@
-(load "core-mk-explicit-failure.scm")
+(load "core-mk-explicit-unification-failure.scm")
 (load "../faster-miniKanren/test-check.scm")
 
 (test "mko-0"
