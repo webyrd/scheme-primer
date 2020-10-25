@@ -1,6 +1,6 @@
-(load "../faster-miniKanren/mk-vicare.scm")
-(load "../faster-miniKanren/mk.scm")
-(load "../faster-miniKanren/test-check.scm")
+(load "../../faster-miniKanren/mk-vicare.scm")
+(load "../../faster-miniKanren/mk.scm")
+(load "../../faster-miniKanren/test-check.scm")
 (load "core-mk-simple.scm")
 (load "core-mk-complex.scm")
 

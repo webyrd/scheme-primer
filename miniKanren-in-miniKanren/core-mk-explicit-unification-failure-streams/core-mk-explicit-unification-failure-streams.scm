@@ -1,5 +1,5 @@
-(load "../faster-miniKanren/mk-vicare.scm")
-(load "../faster-miniKanren/mk.scm")
+(load "../../faster-miniKanren/mk-vicare.scm")
+(load "../../faster-miniKanren/mk.scm")
 
 ;; Relational environment-passing, substitution-passing interpreter
 ;; for a subset of miniKanren, written in miniKanren.
