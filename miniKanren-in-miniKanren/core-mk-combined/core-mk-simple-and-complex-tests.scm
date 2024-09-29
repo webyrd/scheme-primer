@@ -166,10 +166,10 @@
       ((== 'dog x)))))
 
 (test "mko-simple and mko-complex combined tests 1c"
-  (run 1 (e)
+  (run 1 (ge)
     (fresh (simple-expr complex-expr)
-      (== `(run 1 (x) ,e) simple-expr)
-      (== `(run* (x) ,e) complex-expr)
+      (== `(run 1 (x) ,ge) simple-expr)
+      (== `(run* (x) ,ge) complex-expr)
       (mko-simple simple-expr 'cat)
       (mko-simple simple-expr 'dog)
       (mko-complex complex-expr '(dog cat))))
@@ -178,10 +178,10 @@
       ((== 'cat x)))))
 
 (test "mko-simple and mko-complex combined tests 1d"
-  (run 5 (e)
+  (run 5 (ge)
     (fresh (simple-expr complex-expr l e1 e2)
-      (== `(run 1 (x) ,e) simple-expr)
-      (== `(run* (x) ,e) complex-expr)
+      (== `(run 1 (x) ,ge) simple-expr)
+      (== `(run* (x) ,ge) complex-expr)
       (mko-simple simple-expr 'cat)
       (mko-simple simple-expr 'dog)
       (== (list e1 e2) l)
@@ -456,17 +456,17 @@
      (sym _.0 _.1))))
 
 (test "mko-simple and mko-complex combined tests 6b"
-  (run 1 (e)
+  (run 1 (ge)
     (fresh (simple-expr complex-expr)
-      (== `(run 1 (x) ,e) simple-expr)
-      (== `(run* (x) ,e) complex-expr)
-      (fresh (e^)
+      (== `(run 1 (x) ,ge) simple-expr)
+      (== `(run* (x) ,ge) complex-expr)
+      (fresh (ge^)
         (== `(conde
                ((== 'cat x))
                ((conde
                   ((== 'dog x))
-                  (,e^))))
-            e))
+                  (,ge^))))
+            ge))
       (mko-simple simple-expr 'dog)
       (mko-simple simple-expr 'cat)
       (mko-complex complex-expr '(cat dog))))
