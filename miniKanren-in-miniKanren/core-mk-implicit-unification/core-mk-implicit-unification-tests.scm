@@ -21,6 +21,8 @@
 ;;; second answer, if we want to use the interpreter for program
 ;;; synthesis.  Otherwise, miniKanren can just synthesize programs
 ;;; that never extend the substitution.
+;;
+;; run 3 appears to diverge
 (test "mko-1c"
   (run 2 (e)
     (mko `(run 1 (x)
@@ -29,9 +31,23 @@
   '('cat
     x))
 
-(test "mko-1c"
+(test "mko-1c2"
   (run* (v)
     (mko `(run 1 (x)
             (== x x))
          v))
   '(_.0))
+
+(test "mko-1c3"
+  (run* (e)
+    (mko `(run 1 (x)
+            (== ',e x))
+         'cat))
+  '(cat))
+
+(test "mko-1c4"
+  (run 1 (e)
+    (mko `(run 1 (x)
+            ,e)
+         'cat))
+  '((== '_.0 '_.0)))
