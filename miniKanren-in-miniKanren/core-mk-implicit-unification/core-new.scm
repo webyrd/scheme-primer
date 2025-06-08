@@ -52,7 +52,7 @@
 ;; or can the sk and fk coexist nicely with a streams-based miniKanren?
 ;;
 ;; Do mu and meaning need to be implemented in faster-miniKanren, and
-;; used meta-circularly?
+;; used meta-circularly?  Nada doesn't think so.
 
 
 
