@@ -117,11 +117,7 @@
                (begin
                  (printf "env^: ~s\n" env^)
                  (fresh ()
-                   (evalo mu-body env^ evalo-res)
-                   (project (evalo-res)
-                     (begin
-                       (printf "evalo-res: ~s\n" evalo-res)
-                       (eval-mko evalo-res env)))))))))))))
+                   (evalo mu-body env^ evalo-res)))))))))))
 
 (defrel (eval-fresho x* ge* env)
   (conde
@@ -175,9 +171,16 @@
         ((fresh (e*)
            (== (cons 'list e*) expr)
            (eval-listo e* env val)))
-        ((fresh (ge menv)
+        ((fresh (ge menv menv-val ge-res)
            (== (list 'meaning ge menv) expr)
-           (evalo ge env val)))))))
+           (evalo menv env menv-val)
+           (project (menv-val)
+             (begin
+               (printf "menv-val: ~s\n" menv-val)
+               (printf "ge: ~s\n" ge)
+               (fresh ()
+                 (evalo ge env ge-res)
+                 (eval-mko ge-res menv-val))))))))))
 
 (defrel (eval-listo e* env v*)
   (conde
