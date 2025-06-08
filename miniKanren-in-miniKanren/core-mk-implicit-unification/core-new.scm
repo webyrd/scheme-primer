@@ -22,6 +22,10 @@
 ;; that run?  Or maybe we need a new interface, similar to how
 ;; reflective towers have 'delta' and 'meaning' operations for
 ;; reification and reflection.  Inject!
+;;
+;; In fact, the "fake" run 1 done by mko doesn't do reification--
+;; reification is done by the top-level outermost "real" run.
+;; Probably the thing done by mko shouldn't be called run at all.
 
 ;; Logic variables are represented metacircularly, as regular
 ;; miniKanren logic variables in the host miniKanren.
