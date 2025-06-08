@@ -98,7 +98,11 @@
        (eval-fresho x* (cons ge ge*) env)))
     ((fresh (c c*)
        (== (list 'conde (cons c c*)) expr)
-       (eval-condeo (cons c c*) env)))))
+       (eval-condeo (cons c c*) env)))
+    ((fresh (ges-param menv-param mu-body ges-arg evalo-res)
+       (== (cons (list 'mu (list ges-param menv-param) mu-body) ges-arg) expr)
+       (evalo mu-body (cons (cons ges-param ges-arg) (cons (cons menv-param env) env)) evalo-res)
+       (eval-mko evalo-res env)))))
 
 (defrel (eval-fresho x* ge* env)
   (conde
@@ -142,7 +146,10 @@
        (evalo e2 env v2)))
     ((fresh (e*)
        (== (cons 'list e*) expr)
-       (eval-listo e* env val)))))
+       (eval-listo e* env val)))
+    ((fresh (ge menv)
+       (== (list 'meaning ge menv) expr)
+       (evalo ge menv val)))))
 
 (defrel (eval-listo e* env v*)
   (conde
@@ -241,3 +248,12 @@
     (((run 1 (_.0) (=/= '_.1 '_.2)) _.3)
      (=/= ((_.1 _.2)))
      (sym _.0))))
+
+
+(test "meta-0"
+  (run* (a) (mko '(run 1 (b) ((mu (ges env) (meaning (car ges) env)) (== 1 2) (== 1 1))) a))
+  '())
+
+(test "meta-1"
+  (run* (a) (mko '(run 1 (b) ((mu (ges env) (meaning (car (cdr ges)) env)) (== 1 2) (== 1 1))) a))
+  '(_.0))
