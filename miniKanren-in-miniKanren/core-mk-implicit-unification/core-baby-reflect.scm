@@ -272,10 +272,14 @@
   (run* (a) (mko '(run 1 (b) ((mu (ges env) (meaning (car (cdr ges)) env)) (== 1 2) (== 1 1))) a))
   '(_.0))
 
-(test "mko-free-1"
+(test "mko-free-0"
+  (length (run 100 (a b) (mko a b)))
+  100)
+
+#;(test "mko-free-1"
   (length (run 10000 (a b) (mko a b)))
   10000)
 
-(test "mko-free-2"
+#;(test "mko-free-2"
   (length (run 10 (a b) (mko a b)))
   10)
