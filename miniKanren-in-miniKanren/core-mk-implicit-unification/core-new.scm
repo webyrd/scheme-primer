@@ -149,6 +149,14 @@
   (run* (a) (mko '(run 1 (b) (symbolo b) (numbero b)) a))
   '())
 
+(test "mko-6a"
+ (run* (a) (mko '(run 1 (b) (== 5 5)) a))
+  '(_.0))
+
+(test "mko-6b"
+ (run* (a) (mko '(run 1 (b) (== 5 5)) 42))
+  '(_.0))
+
 (test "mko-free-1"
   (length (run 10000 (a b) (mko a b)))
   10000)
