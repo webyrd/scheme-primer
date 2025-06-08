@@ -35,8 +35,9 @@
 ;;  (== 1 1))
 ;; ignores the first goal, so this succeeds
 
-;; Would env would be the mapping between logic variables?  Do we need a constraint store/state?
-;; Do we want explicit continuations, like in reflective tower languages?
+;; Would env would be the mapping between logic variables?  Do we need
+;; a constraint store/state?  Do we want explicit continuations, like
+;; in reflective tower languages?
 ;;
 ;; (mu (ges env store k) ...)
 ;; (meaning ges env store k)
@@ -53,7 +54,8 @@
 ;;
 ;; Do mu and meaning need to be implemented in faster-miniKanren, and
 ;; used meta-circularly?  Nada doesn't think so.
-
+;;
+;; mu is a goal.  meaning is a function.  mu is used in goal position (muo?)
 
 
 
