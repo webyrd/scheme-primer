@@ -8,7 +8,7 @@
 ;;
 ;; With Nada Amin
 
-;; Questions:
+;; Research Questions:
 ;;
 ;; 1. Logic variables are represented metacircularly, as regular
 ;; miniKanren logic variables in the host miniKanren.  However, the
@@ -26,6 +26,31 @@
 ;; In fact, the "fake" run 1 done by mko doesn't do reification--
 ;; reification is done by the top-level outermost "real" run.
 ;; Probably the thing done by mko shouldn't be called run at all.
+
+;; Nada suggests 'mu' instead of 'delta', and 'meaning':
+
+;; ((mu (ges env)
+;;     (meaning (cadr ges) env))
+;;  (== 1 2)
+;;  (== 1 1))
+;; ignores the first goal, so this succeeds
+
+;; Would env would be the mapping between logic variables?  Do we need a constraint store/state?
+;; Do we want explicit continuations, like in reflective tower languages?
+;;
+;; (mu (ges env store k) ...)
+;;
+;; or perhaps with explicit success and failure continuations:
+;;
+;; (mu (ges env store sk fk) ...)
+;;
+;; Should we be using first-order miniKanren?
+;;
+;; If we go with sk and fk, should we use a miniKanren based on sk/fk,
+;; or can the sk and fk coexist nicely with a streams-based miniKanren?
+
+
+
 
 ;; Logic variables are represented metacircularly, as regular
 ;; miniKanren logic variables in the host miniKanren.
