@@ -5,6 +5,8 @@
 ;; Experimenting with a new simple foundation for
 ;; miniKanren-in-miniKanren, meta-circularly, as the basis for
 ;; reflective towers, relational style.
+;;
+;; With Nada Amin
 
 ;; Logic variables are represented metacircularly, as regular
 ;; miniKanren logic variables in the host miniKanren.
