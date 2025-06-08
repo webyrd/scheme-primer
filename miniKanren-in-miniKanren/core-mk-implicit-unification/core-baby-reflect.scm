@@ -177,7 +177,7 @@
            (eval-listo e* env val)))
         ((fresh (ge menv)
            (== (list 'meaning ge menv) expr)
-           (evalo ge menv val)))))))
+           (evalo ge env val)))))))
 
 (defrel (eval-listo e* env v*)
   (conde
