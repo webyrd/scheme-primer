@@ -55,7 +55,8 @@
 ;; Do mu and meaning need to be implemented in faster-miniKanren, and
 ;; used meta-circularly?  Nada doesn't think so.
 ;;
-;; mu is a goal.  meaning is a function.  mu is used in goal position (muo?)
+;; mu is a function that, when called, produces a function that is a
+;; variadic goal constructor.
 
 
 
