@@ -8,6 +8,21 @@
 ;;
 ;; With Nada Amin
 
+;; Questions:
+;;
+;; 1. Logic variables are represented metacircularly, as regular
+;; miniKanren logic variables in the host miniKanren.  However, the
+;; encoding in this file uses an environment that maps logic variables
+;; to logic variables.  Is there a meta-circular way to avoid this
+;; extra explicit environment?
+;;
+;; 2. The miniKanren operators are all encoded meta-circularly (== in
+;; terms of ==, conde in terms of conde, etc.), *except* for run.  Is
+;; there a way to use run metacircularly?  And to get reification via
+;; that run?  Or maybe we need a new interface, similar to how
+;; reflective towers have 'delta' and 'meaning' operations for
+;; reification and reflection.  Inject!
+
 ;; Logic variables are represented metacircularly, as regular
 ;; miniKanren logic variables in the host miniKanren.
 
