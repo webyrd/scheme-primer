@@ -39,10 +39,12 @@
 ;; Do we want explicit continuations, like in reflective tower languages?
 ;;
 ;; (mu (ges env store k) ...)
+;; (meaning ges env store k)
 ;;
 ;; or perhaps with explicit success and failure continuations:
 ;;
 ;; (mu (ges env store sk fk) ...)
+;; (meaning ges env store sk fk)
 ;;
 ;; Should we be using first-order miniKanren?
 ;;
