@@ -50,6 +50,9 @@
 ;;
 ;; If we go with sk and fk, should we use a miniKanren based on sk/fk,
 ;; or can the sk and fk coexist nicely with a streams-based miniKanren?
+;;
+;; Do mu and meaning need to be implemented in faster-miniKanren, and
+;; used meta-circularly?
 
 
 
