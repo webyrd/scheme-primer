@@ -222,6 +222,18 @@
   (run* (a) (mko '(run 1 (b) ((mu (ges env) (list '== 2 2)) (== 1 1))) a))
   '(_.0))
 
+(test "meta-mu-simple-2"
+  (run* (a) (mko '(run 1 (b) ((mu (ges env) (list '== 2 2)) (== 1 2) (== 1 1))) a))
+  '(_.0))
+
+(test "meta-mu-simple-3"
+  (run* (a) (mko '(run 1 (b) ((mu (ges env) (car ges)) (== 1 1) (== 1 2))) a))
+  '(_.0))
+
+(test "meta-mu-simple-4"
+  (run* (a) (mko '(run 1 (b) ((mu (ges env) (car (cdr ges))) (== 1 2) (== 1 1))) a))
+  '(_.0))
+
 (test "meta-0"
   (run* (a) (mko '(run 1 (b) ((mu (ges env) (meaning (car ges) env)) (== 1 2) (== 1 1))) a))
   '())
