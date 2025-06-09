@@ -103,6 +103,11 @@
        (=/= t1 t2)
        (evalo e1 env t1)
        (evalo e2 env t2)))
+    ((fresh (e1 e2 t1 t2)
+       (== (list 'absento e1 e2) expr)
+       (absento t1 t2)
+       (evalo e1 env t1)
+       (evalo e2 env t2)))    
     ((fresh (x* ge ge*)
        (== (cons 'fresh (cons x* (cons ge ge*))) expr)
        (eval-fresho x* (cons ge ge*) env)))
@@ -253,6 +258,30 @@
 (test "mko-6b"
  (run* (a) (mko '(run 1 (b) (== 5 5)) 42))
   '(_.0))
+
+(test "mko-7"
+ (run* (a) (mko '(run 1 (b) (== (list 'cat 'dog) b)) a))
+  '((cat dog)))
+
+(test "mko-7b"
+ (run* (a) (mko '(run 1 (b) (=/= (list 'cat 'dog) b) (== (list 'cat 'dog) b)) a))
+  '())
+
+(test "mko-7c"
+ (run* (a) (mko '(run 1 (b) (== (list 'cat 'dog) b) (=/= (list 'cat 'dog) b)) a))
+  '())
+
+(test "mko-7d"
+ (run* (a) (mko '(run 1 (b) (== (list 'cat 'dog) b) (absento 'dog b)) a))
+  '())
+
+(test "mko-7e"
+ (run* (a) (mko '(run 1 (b) (== (list 'cat 'dog) b) (absento 'cat b)) a))
+  '())
+
+(test "mko-7f"
+ (run* (a) (mko '(run 1 (b) (absento 'cat b)) a))
+  '((_.0 (absento (cat _.0)))))
 
 (test "meta-mu-simple-1"
   (run* (a) (mko '(run 1 (b) ((mu (ges env) (list '== 2 2)) (== 1 1))) a))
